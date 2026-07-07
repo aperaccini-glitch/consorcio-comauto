@@ -132,7 +132,7 @@
         
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-        /* Botões de Estilo Apple / Premium */
+        /* Botões Estilo Premium */
         .btn-group { display: flex; gap: 15px; margin-top: 30px; }
         button { 
             flex: 1; 
@@ -582,11 +582,10 @@ function exportarPDFPropostaViva() {
         novaParcela = saldoAposDescontarLance / mesesRestantes;
     }
     
-    const economyTotal = totalFinanc - totalConsorcioAteFim;
+    const economiaTotal = totalFinanc - totalConsorcioAteFim;
 
     // ESTILO DE CABEÇALHO ULTRACLEAN E MODERNO
     const aplicarCabecalho = (tituloAba, subAba) => {
-        // Linha superior sutil azul
         doc.setFillColor(11, 35, 65);
         doc.rect(0, 0, 210, 4, 'F');
         
@@ -602,7 +601,6 @@ function exportarPDFPropostaViva() {
         doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
         doc.text(subAba, 130, 30, {align: "left"});
         
-        // Linha divisória fina inferior do cabeçalho
         doc.setDrawColor(241, 245, 249);
         doc.line(15, 42, 195, 42);
     };
@@ -617,7 +615,6 @@ function exportarPDFPropostaViva() {
     doc.text(`Consultor: ${consultor}`, 140, 58);
     doc.text(`Emissão: ${dataFormatada}`, 140, 64);
     
-    // Bloco Principal Clean
     doc.setFillColor(248, 250, 252); doc.rect(15, 75, 180, 42, 'F');
     doc.setDrawColor(226, 232, 240); doc.rect(15, 75, 180, 42, 'S');
     
@@ -627,7 +624,6 @@ function exportarPDFPropostaViva() {
     doc.text(`Valor de Crédito Desejado: R$ ${credito.toLocaleString('pt-BR')},00`, 22, 97);
     doc.text(`Parcela Contratada Base: R$ ${parcelaC.toFixed(2)}/mês`, 22, 106);
     
-    // Alerta de Lance Sutil
     doc.setFillColor(254, 243, 199); doc.rect(15, 127, 180, 14, 'F');
     doc.setFont("Helvetica", "bold"); doc.setTextColor(146, 64, 14); doc.setFontSize(9.5);
     doc.text(`ESTRATÉGIA DE LANCE OFERTADO: R$ ${valorLance.toLocaleString('pt-BR')},00 (${pctLance.toFixed(2)}%)`, 22, 136);
@@ -640,7 +636,7 @@ function exportarPDFPropostaViva() {
     const itens = [
         ["Prazo Operacional do Grupo", `${prazo} meses`],
         ["Taxa de Administração Total Contratada", `R$ ${txAdmReais.toLocaleString('pt-BR')},00 (${taxaAdmInserida.toFixed(1)}%)`],
-        ["Fundo de Seguro de Vida", `${perfil === "PF" && grupo !== "1643" && group !== "1646" && grupo !== "51" ? "Incluso em Tabela" : "Isento / Não aplicável"}`],
+        ["Fundo de Seguro de Vida", `${perfil === "PF" && grupo !== "1643" && grupo !== "1646" && grupo !== "51" ? "Incluso em Tabela" : "Isento / Não aplicável"}`],
         ["Reajuste de Tabela Homologado", "Anual, indexado pelo IPCA"],
         ["Custo Total Fixo de Tabela", `${formatarMoeda(totalConsorcioAteFim)}`],
         ["Modalidade Selecionada", `Parcela ${tipoParcela.toUpperCase()}`]
@@ -672,7 +668,6 @@ function exportarPDFPropostaViva() {
     doc.text(`Parcela Mensal Estimada: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
     doc.text(`Custo Acumulado Final com o Banco: ${formatarMoeda(totalFinanc)}`, 22, 140);
 
-    // Economia Destaque Moderno
     doc.setFillColor(220, 252, 231); doc.rect(15, 162, 180, 18, 'F');
     doc.setDrawColor(187, 247, 208); doc.rect(15, 162, 180, 18, 'S');
     doc.setTextColor(21, 128, 61); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
@@ -688,7 +683,6 @@ function exportarPDFPropostaViva() {
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
     doc.text(`Demonstração do abatimento imediato no saldo devedor com o lance líquido de ${formatarMoeda(valorLance)}.`, 15, 68);
 
-    // Três Caixas Paralelas de Resultados Clean
     doc.setFillColor(241, 245, 249); doc.rect(15, 80, 54, 24, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.text("PARCELA ORIGINAL", 19, 87);
     doc.setFontSize(10); doc.setTextColor(11, 35, 65); doc.text(`${formatarMoeda(parcelaC)}`, 19, 97);
