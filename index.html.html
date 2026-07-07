@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Vendas - Consórcio Comauto</title>
+    <!-- Bibliotecas Essenciais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts para Tipografia Fina e Moderna -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #0f172a; 
+            --comauto-blue: #0b2341;
+            --success-green: #10b981;
+            --success-bg: #ecfdf5;
+            --bg-main: #f8fafc;
+            --card-border: #f1f5f9;
+            --text-main: #334155;
+            --text-muted: #64748b;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        body { 
+            margin: 0; 
+            background-color: var(--bg-main); 
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navbar Elegante e Clean */
+        .navbar { 
+            background-color: white; 
+            padding: 20px 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 1px solid var(--card-border);
+        }
+        .navbar img { height: 50px; width: auto; object-fit: contain; }
+        .navbar .title-container { text-align: right; }
+        .navbar .main-title { font-size: 20px; font-weight: 700; color: var(--comauto-blue); margin: 0; letter-spacing: -0.5px; }
+        .navbar .sub-title { font-size: 12px; font-weight: 500; color: var(--text-muted); margin: 4px 0 0 0; }
+
+        /* Grid de Conteúdo com Lindo Respiro */
+        .container { 
+            max-width: 1300px; 
+            margin: 40px auto; 
+            padding: 0 30px; 
+            display: grid; 
+            grid-template-columns: 1.15fr 1fr; 
+            gap: 40px; 
+        }
+        @media(max-width: 1024px) { .container { grid-template-columns: 1fr; gap: 30px; } }
+
+        /* Cards Flutuantes e Modernos */
+        .card { 
+            background: white; 
+            padding: 35px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+            border: 1px solid var(--card-border);
+        }
+        
+        h2 { 
+            color: var(--comauto-blue); 
+            font-size: 15px; 
+            font-weight: 700;
+            margin-top: 0; 
+            margin-bottom: 25px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: var(--comauto-blue);
+            border-radius: 2px;
+        }
+        
+        .section-divider {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        /* Inputs e Formulários Refinados */
+        .form-group { margin-bottom: 20px; }
+        label { 
+            font-weight: 600; 
+            font-size: 11px; 
+            display: block; 
+            margin-bottom: 8px; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        input, select { 
+            width: 100%; 
+            padding: 12px 16px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            color: var(--primary-dark);
+            background-color: #fff;
+        }
+        input:focus, select:focus { 
+            outline: none; 
+            border-color: var(--comauto-blue); 
+            box-shadow: 0 0 0 4px rgba(11, 35, 65, 0.06); 
+        }
+        input[readonly] {
+            background-color: var(--bg-main);
+            border-color: var(--card-border);
+            color: var(--text-muted);
+        }
+        
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* Botões de Estilo Apple / Premium */
+        .btn-group { display: flex; gap: 15px; margin-top: 30px; }
+        button { 
+            flex: 1; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+        }
+        .btn-calc { 
+            background-color: var(--bg-main); 
+            color: var(--comauto-blue); 
+            border: 1px solid #cbd5e1;
+        }
+        .btn-calc:hover { background-color: #e2e8f0; }
+        
+        .btn-pdf { 
+            background-color: var(--comauto-blue); 
+            color: white; 
+            box-shadow: 0 4px 12px rgba(11, 35, 65, 0.15);
+        }
+        .btn-pdf:hover { background-color: #051224; transform: translateY(-1px); }
+
+        /* Caixa de Resultados Clean */
+        .result-box { 
+            background: var(--bg-main); 
+            padding: 24px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid var(--card-border);
+        }
+        .result-box.highlight { 
+            border-color: rgba(16, 185, 129, 0.2); 
+            background: var(--success-bg); 
+        }
+        .res-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .res-val { font-size: 28px; font-weight: 800; color: var(--comauto-blue); margin: 6px 0; letter-spacing: -0.5px; }
+        .res-desc { font-size: 13px; color: var(--text-main); line-height: 1.6; }
+        
+        .chart-container { position: relative; margin-top: 35px; height: 300px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <img id="imgLogo" src="logo.png" alt="Consórcio Comauto" onload="logoCarregada()" onerror="this.style.display='none'; document.getElementById('fallbackTitle').style.display='block';">
+    <div id="fallbackTitle" class="main-title" style="display:none;">CONSÓRCIO COMAUTO</div>
+    <div class="title-container">
+        <div class="main-title">Gerador de Propostas</div>
+        <div class="sub-title">Valores Oficiais de Tabela</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Identificação Comercial</h2>
+        <div class="row">
+            <div class="form-group">
+                <label for="nomeCliente">Nome do Cliente</label>
+                <input type="text" id="nomeCliente" value="Bruno">
+            </div>
+            <div class="form-group">
+                <label for="nomeConsultor">Nome do Consultor(a)</label>
+                <input type="text" id="nomeConsultor" value="Amanda Peraccini">
+            </div>
+        </div>
+
+        <h2 class="section-divider">Configuração do Consórcio</h2>
+        <div class="row">
+            <div class="form-group">
+                <label for="grupo">Grupo / Prazo</label>
+                <select id="grupo" onchange="atualizarCampos()">
+                    <option value="51">Grupo 51 (168 Meses) - Imóveis</option>
+                    <option value="1641">Grupo 1641 (46 Meses) - Auto</option>
+                    <option value="1642">Grupo 1642 (52 Meses) - Auto</option>
+                    <option value="1643">Grupo 1643 (48 Meses) - Moto</option>
+                    <option value="1644">Grupo 1644 (60 Meses) - Auto</option>
+                    <option value="1645">Grupo 1645 (68 Meses) - Auto</option>
+                    <option value="1646">Grupo 1646 (60 Meses) - Moto/Auto</option>
+                    <option value="1647">Grupo 1647 (96 Meses) - Auto</option>
+                    <option value="1648" selected>Grupo 1648 (70 Meses) - Auto</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="perfil">Perfil do Proponente</label>
+                <select id="perfil" onchange="atualizarCampos()">
+                    <option value="PF">Pessoa Física</option>
+                    <option value="PJ" selected>Pessoa Jurídica</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="credito">Valor do Crédito</label>
+                <select id="credito" onchange="calcularTudo()"></select>
+            </div>
+            <div class="form-group">
+                <label for="tipoParcela">Modalidade da Parcela</label>
+                <select id="tipoParcela" onchange="atualizarTaxaAdm()">
+                    <option value="linear">Linear (100%)</option>
+                    <option value="reduzida">Reduzida (75%) - Apenas Grupo 51</option>
+                    <option value="leve" selected>Leve (50%)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="taxaAdm">Taxa de Administração (%)</label>
+                <input type="number" id="taxaAdm" value="19" readonly>
+            </div>
+            <div class="form-group">
+                <label for="comSeguro">Seguro de Vida</label>
+                <input type="text" id="comSeguro" value="Incluso em Tabela" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label for="valorLance">Lance Estratégico Ofertado (R$)</label>
+                <input type="number" id="valorLance" value="9000" oninput="calcularTudo()">
+            </div>
+            <div class="form-group">
+                <label for="mesContemplacao">Mês da Contemplação</label>
+                <input type="number" id="mesContemplacao" value="1" min="1" oninput="calcularTudo()">
+            </div>
+        </div>
+
+        <h2 class="section-divider">Mercado Bancário (Financiamento)</h2>
+        <div class="row">
+            <div class="form-group">
+                <label for="prazoFinanciamento">Prazo do Financiamento</label>
+                <select id="prazoFinanciamento" onchange="calcularTudo()">
+                    <option value="36">36 meses</option>
+                    <option value="48">48 meses</option>
+                    <option value="60" selected>60 meses</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="jurosFinanc">Taxa Juros Banco (% a.m.)</label>
+                <input type="number" id="jurosFinanc" value="2.00" step="0.01" oninput="calcularTudo()">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="entradaFinanc">Valor de Entrada no Banco (R$)</label>
+            <input type="number" id="entradaFinanc" value="0" oninput="calcularTudo()">
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-calc" onclick="calcularTudo()">📊 Atualizar Dados</button>
+            <button class="btn-pdf" onclick="exportarPDFPropostaViva()">📄 Imprimir Proposta PDF</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Painel Comparativo</h2>
+        <div class="result-box">
+            <div class="res-label">Consórcio Comauto (Parcela Inicial)</div>
+            <div class="res-val" id="resConsorcio">R$ 0,00</div>
+            <div class="res-desc" id="descConsorcio"></div>
+        </div>
+        <div class="result-box">
+            <div class="res-label" id="labelFinanc">Financiamento Bancário</div>
+            <div class="res-val" id="resFinanc">R$ 0,00</div>
+            <div class="res-desc" id="descFinanc"></div>
+        </div>
+        <div class="result-box highlight">
+            <div class="res-label" style="color: var(--success-green);">Economia Real Gerada</div>
+            <div class="res-val" id="resEconomia" style="color: var(--success-green);">R$ 0,00</div>
+        </div>
+        <div class="chart-container">
+            <canvas id="graficoComparativo"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+const bancoDadosComauto = {
+    "51": {
+        prazo: 168,
+        PF: {
+            "156660": { linear: 1146.98, reduzida: 860.23, leve: 573.49 },
+            "182770": { linear: 1338.14, reduzida: 1003.60, leve: 669.07 },
+            "208880": { linear: 1529.30, reduzida: 1146.98, leve: 764.65 },
+            "234990": { linear: 1720.46, reduzida: 1290.35, leve: 860.23 },
+            "261100": { linear: 1911.63, reduzida: 1433.72, leve: 955.81 },
+            "287210": { linear: 2102.79, reduzida: 1577.09, leve: 1051.39 },
+            "313320": { linear: 2293.95, reduzida: 1720.46, leve: 1146.98 }
+        },
+        PJ: {
+            "156660": { linear: 1146.98, reduzida: 860.23, leve: 573.49 },
+            "182770": { linear: 1338.14, reduzida: 1003.60, leve: 669.07 },
+            "208880": { linear: 1529.30, reduzida: 1146.98, leve: 764.65 },
+            "234990": { linear: 1720.46, reduzida: 1290.35, leve: 860.23 },
+            "261100": { linear: 1911.63, reduzida: 1433.72, leve: 955.81 },
+            "287210": { linear: 2102.79, reduzida: 1577.09, leve: 1051.39 },
+            "313320": { linear: 2293.95, reduzida: 1720.46, leve: 1146.98 }
+        }
+    },
+    "1641": {
+        prazo: 46,
+        PF: { "34250": { linear: 889.33, leve: 889.33 }, "45665": { linear: 1185.73, leve: 1185.73 }, "57082": { linear: 1482.18, leve: 1482.18 }, "68498": { linear: 1778.61, leve: 1778.61 } },
+        PJ: { "34250": { linear: 856.24, leve: 856.24 }, "45665": { linear: 1141.62, leve: 1141.62 }, "57082": { linear: 1427.04, leve: 1427.04 }, "68498": { linear: 1712.44, leve: 1712.44 } }
+    },
+    "1642": {
+        prazo: 52,
+        PF: { "43927": { linear: 1013.91, leve: 1013.91 }, "54909": { linear: 1267.39, leve: 1267.39 }, "65891": { linear: 1520.87, leve: 1520.87 }, "76873": { linear: 1774.36, leve: 1774.36 }, "87855": { linear: 2027.84, leve: 2027.84 } },
+        PJ: { "43927": { linear: 971.47, leve: 971.47 }, "54909": { linear: 1214.35, leve: 1214.35 }, "65891": { linear: 1457.22, leve: 1457.22 }, "76873": { linear: 1700.10, leve: 1700.10 }, "87855": { linear: 1942.97, leve: 1942.97 } }
+    },
+    "1643": {
+        prazo: 48,
+        PF: { 
+            "15798": { linear: 393.75, leve: 393.75 }, "17378": { linear: 433.13, leve: 433.13 }, "18958": { linear: 472.51, leve: 472.51 }, 
+            "20537": { linear: 511.86, leve: 511.86 }, "22117": { linear: 551.24, leve: 551.24 }, "23697": { linear: 590.62, leve: 590.62 }, 
+            "25277": { linear: 630.00, leve: 630.00 }, "26857": { linear: 669.38, leve: 669.38 }, "28436": { linear: 708.74, leve: 708.74 }, 
+            "30016": { linear: 748.12, leve: 748.12 }, "31596": { linear: 787.50, leve: 787.50 } 
+        },
+        PJ: { 
+            "15798": { linear: 378.49, leve: 378.49 }, "17378": { linear: 416.34, leve: 416.34 }, "18958": { linear: 454.19, leve: 454.19 }, 
+            "20537": { linear: 492.02, leve: 492.02 }, "22117": { linear: 529.88, leve: 529.88 }, "23697": { linear: 567.73, leve: 567.73 }, 
+            "25277": { linear: 605.59, leve: 605.59 }, "26857": { linear: 643.44, leve: 643.44 }, "28436": { linear: 681.27, leve: 681.27 }, 
+            "30016": { linear: 719.12, leve: 719.12 }, "31596": { linear: 756.98, leve: 756.98 } 
+        }
+    },
+    "1644": {
+        prazo: 60,
+        PF: { "52660": { linear: 1060.21, leve: 1060.21 }, "63192": { linear: 1272.25, leve: 1272.25 }, "73724": { linear: 1484.29, leve: 1484.29 }, "84256": { linear: 1696.33, leve: 1696.33 }, "94788": { linear: 1908.37, leve: 1908.37 }, "105320": { linear: 2120.41, leve: 2120.41 } },
+        PJ: { "52660": { linear: 1009.34, leve: 1009.34 }, "63192": { linear: 1211.20, leve: 1211.20 }, "73724": { linear: 1413.07, leve: 1413.07 }, "84256": { linear: 1614.94, leve: 1614.94 }, "94788": { linear: 1816.81, leve: 1816.81 }, "105320": { linear: 2018.67, leve: 2018.67 } }
+    },
+    "1645": {
+        prazo: 68,
+        PF: { "52220": { linear: 933.58, leve: 933.58 }, "62664": { linear: 1120.30, leve: 1120.30 }, "73108": { linear: 1307.02, leve: 1307.02 }, "83552": { linear: 1493.73, leve: 1493.73 }, "93996": { linear: 1680.45, leve: 1680.45 }, "104440": { linear: 1867.17, leve: 1867.17 } },
+        PJ: { "52220": { linear: 883.14, leve: 883.14 }, "62664": { linear: 1059.77, leve: 1059.77 }, "73108": { linear: 1236.40, leve: 1236.40 }, "83552": { linear: 1413.02, leve: 1413.02 }, "93996": { linear: 1589.65, leve: 1589.65 }, "104440": { linear: 1766.28, leve: 1766.28 } }
+    },
+    "1646": {
+        prazo: 60,
+        PF: { "15000": { linear: 302.00, leve: 302.00 }, "16500": { linear: 332.20, leve: 332.20 }, "18000": { linear: 362.39, leve: 362.39 }, "19500": { linear: 392.59, leve: 392.59 }, "21000": { linear: 422.79, leve: 422.79 }, "22500": { linear: 452.99, leve: 452.99 }, "24000": { linear: 483.19, leve: 483.19 }, "25500": { linear: 513.39, leve: 513.39 }, "27000": { linear: 543.59, leve: 543.59 }, "28500": { linear: 573.79, leve: 573.79 }, "30000": { linear: 603.99, leve: 603.99 } },
+        PJ: { "15000": { linear: 287.51, leve: 287.51 }, "16500": { linear: 316.26, leve: 316.26 }, "18000": { linear: 345.01, leve: 345.01 }, "19500": { linear: 373.76, leve: 373.76 }, "21000": { linear: 402.51, leve: 402.51 }, "22500": { linear: 431.26, leve: 431.26 }, "24000": { linear: 460.01, leve: 460.01 }, "25500": { linear: 488.76, leve: 488.76 }, "27000": { linear: 517.51, leve: 517.51 }, "28500": { linear: 546.26, leve: 546.26 }, "30000": { linear: 575.01, leve: 575.01 } }
+    },
+    "1647": {
+        prazo: 96,
+        PF: { "75000": { linear: 970.92, leve: 501.08 }, "90000": { linear: 1165.10, leve: 601.30 }, "105000": { linear: 1359.28, leve: 701.52 }, "120000": { linear: 1553.47, leve: 801.73 }, "135000": { linear: 1747.65, leve: 901.95 }, "150000": { linear: 1941.83, leve: 1002.17 } },
+        PJ: { "75000": { linear: 898.47, leve: 464.86 }, "90000": { linear: 1078.16, leve: 557.83 }, "105000": { linear: 1257.85, leve: 650.80 }, "120000": { linear: 1437.55, leve: 743.77 }, "135000": { linear: 1617.24, leve: 836.75 }, "150000": { linear: 1796.93, leve: 929.72 } }
+    },
+    "1648": {
+        prazo: 70,
+        PF: { "30000": { linear: 521.85, leve: 269.50 }, "35000": { linear: 608.82, leve: 314.41 }, "40000": { linear: 695.80, leve: 359.33 }, "45000": { linear: 782.77, leve: 404.24 }, "50000": { linear: 869.75, leve: 449.16 }, "55000": { linear: 956.72, leve: 494.07 }, "60000": { linear: 1043.69, leve: 538.99 } },
+        PJ: { "30000": { linear: 492.87, leve: 255.01 }, "35000": { linear: 575.01, leve: 297.51 }, "40000": { linear: 657.16, leve: 340.01 }, "45000": { linear: 739.30, leve: 382.51 }, "50000": { linear: 821.45, leve: 425.01 }, "55000": { linear: 903.59, leve: 467.51 }, "60000": { linear: 985.73, leve: 510.01 } }
+    }
+};
+
+let chartInstance = null;
+let base64Logo = null;
+
+function logoCarregada() {
+    const img = document.getElementById("imgLogo");
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    base64Logo = canvas.toDataURL("image/png");
+}
+
+function atualizarTaxaAdm() {
+    const grupo = document.getElementById("grupo").value;
+    const tipoParcela = document.getElementById("tipoParcela").value;
+    let taxa = 15;
+
+    if (grupo === "51") {
+        taxa = 22; 
+    } else if (tipoParcela === "leve" || tipoParcela === "reduzida") {
+        taxa = 19; 
+    }
+    
+    document.getElementById("taxaAdm").value = taxa;
+    calcularTudo();
+}
+
+function atualizarCampos() {
+    const grupo = document.getElementById("grupo").value;
+    const perfil = document.getElementById("perfil").value;
+    const selectCredito = document.getElementById("credito");
+    const plano = bancoDadosComauto[grupo];
+    
+    selectCredito.innerHTML = "";
+    
+    if (plano && plano[perfil]) {
+        Object.keys(plano[perfil]).forEach(credito => {
+            let opt = document.createElement("option");
+            opt.value = credito;
+            opt.textContent = `R$ ${parseInt(credito).toLocaleString('pt-BR')},00`;
+            selectCredito.appendChild(opt);
+        });
+    }
+    
+    atualizarTaxaAdm();
+}
+
+function formatarMoeda(v) {
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function calcularTudo() {
+    const grupo = document.getElementById("grupo").value;
+    const perfil = document.getElementById("perfil").value;
+    const credito = parseFloat(document.getElementById("credito").value) || 0;
+    let tipoParcela = document.getElementById("tipoParcela").value;
+    const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
+    const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
+    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value);
+    
+    if (!credito) return;
+
+    const plano = bancoDadosComauto[grupo];
+    const prazo = plano.prazo;
+    
+    if (grupo !== "51" && tipoParcela === "reduzida") {
+        tipoParcela = "linear";
+        document.getElementById("tipoParcela").value = "linear";
+    }
+
+    const parcelaC = plano[perfil][credito][tipoParcela] || plano[perfil][credito]["linear"];
+    const parcelaLinearCheia = plano[perfil][credito]["linear"];
+    
+    const totalConsorcioAteFim = parcelaLinearCheia * prazo; 
+    
+    let novaParcelaPostLance = 0;
+    const mesesRestantes = prazo - mesContemplacao;
+
+    if (tipoParcela === "linear") {
+        const saldoAposDescontarLance = totalConsorcioAteFim - (parcelaLinearCheia * mesContemplacao) - valorLance;
+        novaParcelaPostLance = saldoAposDescontarLance / mesesRestantes;
+    } else {
+        const diferencaAcumuladaNaoPaga = (parcelaLinearCheia - parcelaC) * mesContemplacao;
+        const saldoDevedorFaltanteOriginal = parcelaLinearCheia * mesesRestantes;
+        const saldoDevedorTotalNaAssembleia = saldoDevedorFaltanteOriginal + diferencaAcumuladaNaoPaga;
+        const saldoAposDescontarLance = saldoDevedorTotalNaAssembleia - valorLance;
+        novaParcelaPostLance = saldoAposDescontarLance / mesesRestantes;
+    }
+    
+    let textoLance = `Parcela de Tabela Comauto: <strong>${formatarMoeda(parcelaC)}</strong>.`;
+    if (valorLance > 0) {
+        textoLance += `<br>Nova parcela reduzida pós-lance no mês ${mesContemplacao}: <strong>${formatarMoeda(novaParcelaPostLance)}/mês</strong>.`;
+    }
+    
+    const taxaJuros = parseFloat(document.getElementById("jurosFinanc").value) / 100;
+    const entrada = parseFloat(document.getElementById("entradaFinanc").value) || 0;
+    const valorFinanciado = credito - entrada;
+    let parcelaF = taxaJuros > 0 ? (valorFinanciado * (taxaJuros * Math.pow(1 + taxaJuros, prazoFinanc)) / (Math.pow(1 + taxaJuros, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
+    const totalFinanc = (parcelaF * prazoFinanc) + entrada;
+    const economy = totalFinanc - totalConsorcioAteFim;
+    
+    document.getElementById("resConsorcio").textContent = `${formatarMoeda(parcelaC)} /mês`;
+    document.getElementById("descConsorcio").innerHTML = textoLance;
+    
+    document.getElementById("labelFinanc").textContent = `Financiamento Bancário (${prazoFinanc} Meses)`;
+    document.getElementById("resFinanc").textContent = `${formatarMoeda(parcelaF)} /mês`;
+    document.getElementById("descFinanc").textContent = `Investimento total com o banco: ${formatarMoeda(totalFinanc)}`;
+    
+    document.getElementById("resEconomia").textContent = formatarMoeda(economy);
+    
+    desenharGrafico(totalConsorcioAteFim, totalFinanc);
+}
+
+function desenharGrafico(c, f) {
+    const ctx = document.getElementById('graficoComparativo').getContext('2d');
+    if (chartInstance) chartInstance.destroy();
+    
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Consórcio Comauto', 'Financiamento Bancário'],
+            datasets: [{
+                label: 'Custo Contratual Total',
+                data: [c, f],
+                backgroundColor: ['#0b2341', '#94a3b8'],
+                borderRadius: 6,
+                barThickness: 32
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+function exportarPDFPropostaViva() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const dataHoje = new Date();
+    const dia = String(dataHoje.getDate()).padStart(2, '0');
+    const mes = String(dataHoje.getMonth() + 1).padStart(2, '0');
+    const ano = dataHoje.getFullYear();
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+
+    const cliente = document.getElementById("nomeCliente").value;
+    const consultor = document.getElementById("nomeConsultor").value;
+    const grupo = document.getElementById("grupo").value;
+    const perfil = document.getElementById("perfil").value;
+    const credito = parseFloat(document.getElementById("credito").value);
+    const tipoParcela = document.getElementById("tipoParcela").value;
+    const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
+    const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
+    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value);
+    const taxaAdmInserida = parseFloat(document.getElementById("taxaAdm").value) || 15;
+    
+    const plano = bancoDadosComauto[grupo];
+    const prazo = plano.prazo;
+    
+    const parcelaC = plano[perfil][credito][tipoParcela] || plano[perfil][credito]["linear"];
+    const parcelaLinearCheia = plano[perfil][credito]["linear"];
+    
+    const txAdmReais = credito * (taxaAdmInserida / 100);
+    const pctLance = (valorLance / credito) * 100;
+    
+    const taxaJuros = parseFloat(document.getElementById("jurosFinanc").value) / 100;
+    const entrada = parseFloat(document.getElementById("entradaFinanc").value) || 0;
+    const valorFinanciado = credito - entrada;
+    let parcelaF = taxaJuros > 0 ? (valorFinanciado * (taxaJuros * Math.pow(1 + taxaJuros, prazoFinanc)) / (Math.pow(1 + taxaJuros, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
+    const totalFinanc = (parcelaF * prazoFinanc) + entrada;
+
+    const totalConsorcioAteFim = parcelaLinearCheia * prazo;
+    
+    const mesesRestantes = prazo - mesContemplacao;
+    let diferencaAcumuladaNaoPaga = (parcelaLinearCheia - parcelaC) * mesContemplacao;
+    let saldoDevedorFaltanteOriginal = parcelaLinearCheia * mesesRestantes;
+    let saldoDevedorTotalNaAssembleia = saldoDevedorFaltanteOriginal + diferencaAcumuladaNaoPaga;
+    let saldoAposDescontarLance = 0;
+    let novaParcela = 0;
+
+    if (tipoParcela === "linear") {
+        saldoAposDescontarLance = totalConsorcioAteFim - (parcelaLinearCheia * mesContemplacao) - valorLance;
+        novaParcela = saldoAposDescontarLance / mesesRestantes;
+    } else {
+        saldoAposDescontarLance = saldoDevedorTotalNaAssembleia - valorLance;
+        novaParcela = saldoAposDescontarLance / mesesRestantes;
+    }
+    
+    const economyTotal = totalFinanc - totalConsorcioAteFim;
+
+    // ESTILO DE CABEÇALHO ULTRACLEAN E MODERNO
+    const aplicarCabecalho = (tituloAba, subAba) => {
+        // Linha superior sutil azul
+        doc.setFillColor(11, 35, 65);
+        doc.rect(0, 0, 210, 4, 'F');
+        
+        if (base64Logo) {
+            doc.addImage(base64Logo, 'PNG', 15, 12, 45, 25);
+        } else {
+            doc.setFont("Helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(11, 35, 65);
+            doc.text("COMAUTO CONSÓRCIO", 15, 25);
+        }
+        
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(11, 35, 65);
+        doc.text(tituloAba, 130, 23, {align: "left"});
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+        doc.text(subAba, 130, 30, {align: "left"});
+        
+        // Linha divisória fina inferior do cabeçalho
+        doc.setDrawColor(241, 245, 249);
+        doc.line(15, 42, 195, 42);
+    };
+
+    // --- PÁGINA 1 ---
+    aplicarCabecalho("PROPOSTA DE CONSÓRCIO", "Planejamento Inteligente de Ativos");
+    
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text("ANÁLISE COMERCIAL GERAL", 15, 58); 
+    
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
+    doc.text(`Consultor: ${consultor}`, 140, 58);
+    doc.text(`Emissão: ${dataFormatada}`, 140, 64);
+    
+    // Bloco Principal Clean
+    doc.setFillColor(248, 250, 252); doc.rect(15, 75, 180, 42, 'F');
+    doc.setDrawColor(226, 232, 240); doc.rect(15, 75, 180, 42, 'S');
+    
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65); doc.setFontSize(10.5);
+    doc.text(`CLIENTE EXCLUSIVO: ${cliente.toUpperCase()}`, 22, 88);
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(51, 65, 85);
+    doc.text(`Valor de Crédito Desejado: R$ ${credito.toLocaleString('pt-BR')},00`, 22, 97);
+    doc.text(`Parcela Contratada Base: R$ ${parcelaC.toFixed(2)}/mês`, 22, 106);
+    
+    // Alerta de Lance Sutil
+    doc.setFillColor(254, 243, 199); doc.rect(15, 127, 180, 14, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(146, 64, 14); doc.setFontSize(9.5);
+    doc.text(`ESTRATÉGIA DE LANCE OFERTADO: R$ ${valorLance.toLocaleString('pt-BR')},00 (${pctLance.toFixed(2)}%)`, 22, 136);
+    
+    doc.setTextColor(11, 35, 65); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
+    doc.text("Condições e Estrutura Contratual", 15, 160);
+    
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105); doc.setFontSize(9.5);
+    let y = 172;
+    const itens = [
+        ["Prazo Operacional do Grupo", `${prazo} meses`],
+        ["Taxa de Administração Total Contratada", `R$ ${txAdmReais.toLocaleString('pt-BR')},00 (${taxaAdmInserida.toFixed(1)}%)`],
+        ["Fundo de Seguro de Vida", `${perfil === "PF" && grupo !== "1643" && group !== "1646" && grupo !== "51" ? "Incluso em Tabela" : "Isento / Não aplicável"}`],
+        ["Reajuste de Tabela Homologado", "Anual, indexado pelo IPCA"],
+        ["Custo Total Fixo de Tabela", `${formatarMoeda(totalConsorcioAteFim)}`],
+        ["Modalidade Selecionada", `Parcela ${tipoParcela.toUpperCase()}`]
+    ];
+    itens.forEach(i => {
+        doc.text(i[0], 20, y); doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
+        doc.text(i[1], 135, y); doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
+        doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 11;
+    });
+
+    // --- PÁGINA 2 ---
+    doc.addPage();
+    aplicarCabecalho("ANÁLISE DE CUSTO-BENEFÍCIO", "Consórcio Comauto vs Financiamento");
+    
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text("COMPARATIVO DE CUSTO REAL ABSOLUTO", 15, 58);
+    
+    doc.setFillColor(248, 250, 252); doc.rect(15, 72, 180, 32, 'F');
+    doc.setDrawColor(234, 242, 248); doc.rect(15, 72, 180, 32, 'S');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.text("SISTEMA DE CONSÓRCIO COMAUTO:", 22, 83);
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(71, 85, 105);
+    doc.text(`Parcela Mensal Contratada: ${formatarMoeda(parcelaC)}/mês`, 22, 91);
+    doc.text(`Custo Total do Contrato de Tabela: ${formatarMoeda(totalConsorcioAteFim)}`, 22, 98);
+
+    doc.setFillColor(248, 250, 252); doc.rect(15, 114, 180, 32, 'F');
+    doc.setDrawColor(226, 232, 240); doc.rect(15, 114, 180, 32, 'S');
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65); doc.text(`FINANCIAMENTO BANCÁRIO PROJETADO (${prazoFinanc} MESES):`, 22, 125);
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
+    doc.text(`Parcela Mensal Estimada: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
+    doc.text(`Custo Acumulado Final com o Banco: ${formatarMoeda(totalFinanc)}`, 22, 140);
+
+    // Economia Destaque Moderno
+    doc.setFillColor(220, 252, 231); doc.rect(15, 162, 180, 18, 'F');
+    doc.setDrawColor(187, 247, 208); doc.rect(15, 162, 180, 18, 'S');
+    doc.setTextColor(21, 128, 61); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
+    doc.text(`ECONOMIA LÍQUIDA GERADA PARA O CLIENTE: ${formatarMoeda(economiaTotal)}`, 22, 173);
+
+    // --- PÁGINA 3 ---
+    doc.addPage();
+    aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
+    
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text(`EVOLUÇÃO FINANCEIRA APÓS CONTEMPLAÇÃO (MÊS ${mesContemplacao})`, 15, 58);
+    
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
+    doc.text(`Demonstração do abatimento imediato no saldo devedor com o lance líquido de ${formatarMoeda(valorLance)}.`, 15, 68);
+
+    // Três Caixas Paralelas de Resultados Clean
+    doc.setFillColor(241, 245, 249); doc.rect(15, 80, 54, 24, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.text("PARCELA ORIGINAL", 19, 87);
+    doc.setFontSize(10); doc.setTextColor(11, 35, 65); doc.text(`${formatarMoeda(parcelaC)}`, 19, 97);
+
+    doc.setFillColor(254, 243, 199); doc.rect(78, 80, 54, 24, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(146, 64, 14); doc.text("ABATIMENTO LANCE", 82, 87);
+    doc.setFontSize(10); doc.text(`${formatarMoeda(valorLance)}`, 82, 97);
+
+    doc.setFillColor(220, 252, 231); doc.rect(141, 80, 54, 24, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(21, 128, 61); doc.text("NOVA MENSALIDADE", 145, 87);
+    doc.setFontSize(10); doc.text(`${formatarMoeda(novaParcela)}`, 145, 97);
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text("Memorial Descritivo do Saldo Remanescente", 15, 122);
+    
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105); doc.setFontSize(9.5);
+    let y3 = 134;
+    
+    let linhasCalculo = [];
+    if(tipoParcela === "linear") {
+        linhasCalculo = [
+            ["Custo Contratual Total Fixo da Cota", `${formatarMoeda(totalConsorcioAteFim)}`],
+            [`(-) Quitação acumulada de parcelas até o mês ${mesContemplacao}`, `${formatarMoeda(parcelaLinearCheia * mesContemplacao)}`],
+            ["(-) Amortização por Lance Ofertado", `${formatarMoeda(valorLance)}`],
+            ["(=) Saldo Líquido Restante para Rateio", `${formatarMoeda(saldoAposDescontarLance)}`],
+            ["(/) Meses de Vigência do Grupo Restantes", `${mesesRestantes} meses`],
+            ["(=) Nova Parcela Mensal Corrigida", `${formatarMoeda(novaParcela)}`]
+        ];
+    } else {
+        linhasCalculo = [
+            ["Total pago nas Parcelas Iniciais Reduzidas", `${formatarMoeda(parcelaC * mesContemplacao)}`],
+            ["(+) Ajuste retroativo proporcional de diferença", `${formatarMoeda(diferencaAcumuladaNaoPaga)}`],
+            [`(+) Saldo devedor original futuro estimado`, `${formatarMoeda(saldoDevedorFaltanteOriginal)}`],
+            ["(=) Saldo Devedor Bruto na Assembleia", `${formatarMoeda(saldoDevedorTotalNaAssembleia)}`],
+            ["(-) Redução Direta por Lance Ofertado", `${formatarMoeda(valorLance)}`],
+            ["(=) Saldo Líquido pós-lance", `${formatarMoeda(saldoAposDescontarLance)}`],
+            ["(/) Meses de Vigência do Grupo Restantes", `${mesesRestantes} meses`],
+            ["(=) Nova Parcela Mensal pós-lance", `${formatarMoeda(novaParcela)}`]
+        ];
+    }
+
+    linhasCalculo.forEach(c => {
+        doc.text(c[0], 20, y3); doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
+        doc.text(c[1], 140, y3); doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
+        doc.setDrawColor(241, 245, 249); doc.line(15, y3+2, 195, y3+2); y3 += 10;
+    });
+
+    doc.save(`Proposta_Comauto_VIP_${cliente}.pdf`);
+}
+
+// Inicializar Aplicativo
+atualizarCampos();
+</script>
+</body>
+</html>
