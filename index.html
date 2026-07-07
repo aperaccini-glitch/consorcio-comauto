@@ -210,7 +210,7 @@
             <div class="form-group">
                 <label for="grupo">Grupo / Prazo</label>
                 <select id="grupo" onchange="atualizarCampos()">
-                    <option value="51">Grupo 51 (168 Meses) - Imóveis</option>
+                    <option value="51" selected>Grupo 51 (168 Meses) - Imóveis</option>
                     <option value="1641">Grupo 1641 (46 Meses) - Auto</option>
                     <option value="1642">Grupo 1642 (52 Meses) - Auto</option>
                     <option value="1643">Grupo 1643 (48 Meses) - Moto</option>
@@ -218,14 +218,14 @@
                     <option value="1645">Grupo 1645 (68 Meses) - Auto</option>
                     <option value="1646">Grupo 1646 (60 Meses) - Moto/Auto</option>
                     <option value="1647">Grupo 1647 (96 Meses) - Auto</option>
-                    <option value="1648" selected>Grupo 1648 (70 Meses) - Auto</option>
+                    <option value="1648">Grupo 1648 (70 Meses) - Auto</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="perfil">Perfil do Proponente</label>
                 <select id="perfil" onchange="atualizarCampos()">
-                    <option value="PF">Pessoa Física</option>
-                    <option value="PJ" selected>Pessoa Jurídica</option>
+                    <option value="PF" selected>Pessoa Física</option>
+                    <option value="PJ">Pessoa Jurídica</option>
                 </select>
             </div>
         </div>
@@ -240,7 +240,7 @@
                 <select id="tipoParcela" onchange="atualizarTaxaAdm()">
                     <option value="linear">Linear (100%)</option>
                     <option value="reduzida">Reduzida (75%) - Apenas Grupo 51</option>
-                    <option value="leve" selected>Leve (50%)</option>
+                    <option value="leve">Leve (50%)</option>
                 </select>
             </div>
         </div>
@@ -248,7 +248,7 @@
         <div class="row">
             <div class="form-group">
                 <label for="taxaAdm">Taxa de Administração (%)</label>
-                <input type="number" id="taxaAdm" value="19" readonly>
+                <input type="number" id="taxaAdm" value="22" readonly>
             </div>
             <div class="form-group">
                 <label for="comSeguro">Seguro de Vida</label>
@@ -270,16 +270,14 @@
         <h2 class="section-divider">Mercado Bancário (Financiamento)</h2>
         <div class="row">
             <div class="form-group">
-                <label for="prazoFinanciamento">Prazo do Financiamento</label>
+                <label id="labelPrazoFinanc" for="prazoFinanciamento">Prazo do Financiamento Imobiliário</label>
                 <select id="prazoFinanciamento" onchange="calcularTudo()">
-                    <option value="36">36 meses</option>
-                    <option value="48">48 meses</option>
-                    <option value="60" selected>60 meses</option>
+                    <!-- Preenchido automaticamente via JS baseado no grupo -->
                 </select>
             </div>
             <div class="form-group">
-                <label for="jurosFinanc">Taxa Juros Banco (% a.m.)</label>
-                <input type="number" id="jurosFinanc" value="2.00" step="0.01" oninput="calcularTudo()">
+                <label id="labelJurosFinanc" for="jurosFinanc">Taxa Juros Banco (% a.a. + TR)</label>
+                <input type="number" id="jurosFinanc" value="11.70" step="0.01" oninput="calcularTudo()">
             </div>
         </div>
         <div class="form-group">
@@ -422,16 +420,53 @@ function atualizarCampos() {
     const grupo = document.getElementById("grupo").value;
     const perfil = document.getElementById("perfil").value;
     const selectCredito = document.getElementById("credito");
+    const selectPrazoFinanc = document.getElementById("prazoFinanciamento");
+    const labelPrazo = document.getElementById("labelPrazoFinanc");
+    const labelJuros = document.getElementById("labelJurosFinanc");
+    const inputJuros = document.getElementById("jurosFinanc");
+    
     const plano = bancoDadosComauto[grupo];
     
+    // 1. Atualizar Créditos
     selectCredito.innerHTML = "";
-    
     if (plano && plano[perfil]) {
         Object.keys(plano[perfil]).forEach(credito => {
             let opt = document.createElement("option");
             opt.value = credito;
             opt.textContent = `R$ ${parseInt(credito).toLocaleString('pt-BR')},00`;
             selectCredito.appendChild(opt);
+        });
+    }
+    
+    // 2. INTEGRAÇÃO INTELIGENTE DE IMÓVEL VS VEÍCULO
+    selectPrazoFinanc.innerHTML = "";
+    if (grupo === "51") {
+        // Regras para Financiamento de Imóvel
+        labelPrazo.textContent = "Prazo do Financiamento Imobiliário";
+        labelJuros.textContent = "Taxa Juros Banco (% a.a. + TR)";
+        inputJuros.value = "11.70"; // Média do mercado imobiliário
+        
+        const prazosImovel = [240, 360, 420];
+        prazosImovel.forEach(p => {
+            let opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = `${p} meses (Até 35 anos)`;
+            if(p === 360) opt.selected = true;
+            selectPrazoFinanc.appendChild(opt);
+        });
+    } else {
+        // Regras para Veículos
+        labelPrazo.textContent = "Prazo do Financiamento Bancário";
+        labelJuros.textContent = "Taxa Juros Banco (% a.m.)";
+        inputJuros.value = "2.00"; // Média de mercado auto
+        
+        const prazosAuto = [36, 48, 60];
+        prazosAuto.forEach(p => {
+            let opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = `${p} meses`;
+            if(p === 60) opt.selected = true;
+            selectPrazoFinanc.appendChild(opt);
         });
     }
     
@@ -449,7 +484,7 @@ function calcularTudo() {
     let tipoParcela = document.getElementById("tipoParcela").value;
     const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
     const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
-    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value);
+    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value) || 60;
     
     if (!credito) return;
 
@@ -485,10 +520,22 @@ function calcularTudo() {
         textoLance += `<br>Nova parcela reduzida pós-lance no mês ${mesContemplacao}: <strong>${formatarMoeda(novaParcelaPostLance)}/mês</strong>.`;
     }
     
-    const taxaJuros = parseFloat(document.getElementById("jurosFinanc").value) / 100;
+    // CONVERSÃO E CÁLCULO DE JUROS INTELIGENTE
+    let taxaJurosInput = parseFloat(document.getElementById("jurosFinanc").value) || 0;
+    let taxaJurosMensal = 0;
+    
+    if (grupo === "51") {
+        // Se for imóvel, converte a taxa anual informada para mensal composto: (1 + i_ano)^(1/12) - 1
+        taxaJurosMensal = Math.pow(1 + (taxaJurosInput / 100), 1 / 12) - 1;
+    } else {
+        // Se for auto, usa a taxa direta ao mês
+        taxaJurosMensal = taxaJurosInput / 100;
+    }
+
     const entrada = parseFloat(document.getElementById("entradaFinanc").value) || 0;
     const valorFinanciado = credito - entrada;
-    let parcelaF = taxaJuros > 0 ? (valorFinanciado * (taxaJuros * Math.pow(1 + taxaJuros, prazoFinanc)) / (Math.pow(1 + taxaJuros, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
+    
+    let parcelaF = taxaJurosMensal > 0 ? (valorFinanciado * (taxaJurosMensal * Math.pow(1 + taxaJurosMensal, prazoFinanc)) / (Math.pow(1 + taxaJurosMensal, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
     const totalFinanc = (parcelaF * prazoFinanc) + entrada;
     const economy = totalFinanc - totalConsorcioAteFim;
     
@@ -547,7 +594,8 @@ function exportarPDFPropostaViva() {
     const tipoParcela = document.getElementById("tipoParcela").value;
     const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
     const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
-    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value);
+    const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value) || 60;
+    const jurosInputText = document.getElementById("jurosFinanc").value;
     const taxaAdmInserida = parseFloat(document.getElementById("taxaAdm").value) || 15;
     
     const plano = bancoDadosComauto[grupo];
@@ -559,10 +607,16 @@ function exportarPDFPropostaViva() {
     const txAdmReais = credito * (taxaAdmInserida / 100);
     const pctLance = (valorLance / credito) * 100;
     
-    const taxaJuros = parseFloat(document.getElementById("jurosFinanc").value) / 100;
+    let taxaJurosMensal = 0;
+    if (grupo === "51") {
+        taxaJurosMensal = Math.pow(1 + (parseFloat(jurosInputText) / 100), 1 / 12) - 1;
+    } else {
+        taxaJurosMensal = parseFloat(jurosInputText) / 100;
+    }
+
     const entrada = parseFloat(document.getElementById("entradaFinanc").value) || 0;
     const valorFinanciado = credito - entrada;
-    let parcelaF = taxaJuros > 0 ? (valorFinanciado * (taxaJuros * Math.pow(1 + taxaJuros, prazoFinanc)) / (Math.pow(1 + taxaJuros, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
+    let parcelaF = taxaJurosMensal > 0 ? (valorFinanciado * (taxaJurosMensal * Math.pow(1 + taxaJurosMensal, prazoFinanc)) / (Math.pow(1 + taxaJurosMensal, prazoFinanc) - 1)) : (valorFinanciado / prazoFinanc);
     const totalFinanc = (parcelaF * prazoFinanc) + entrada;
 
     const totalConsorcioAteFim = parcelaLinearCheia * prazo;
@@ -584,7 +638,6 @@ function exportarPDFPropostaViva() {
     
     const economiaTotal = totalFinanc - totalConsorcioAteFim;
 
-    // ESTILO DE CABEÇALHO ULTRACLEAN E MODERNO
     const aplicarCabecalho = (tituloAba, subAba) => {
         doc.setFillColor(11, 35, 65);
         doc.rect(0, 0, 210, 4, 'F');
@@ -663,9 +716,11 @@ function exportarPDFPropostaViva() {
 
     doc.setFillColor(248, 250, 252); doc.rect(15, 114, 180, 32, 'F');
     doc.setDrawColor(226, 232, 240); doc.rect(15, 114, 180, 32, 'S');
-    doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65); doc.text(`FINANCIAMENTO BANCÁRIO PROJETADO (${prazoFinanc} MESES):`, 22, 125);
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
+    const tipoFinancTexto = grupo === "51" ? `IMOBILIÁRIO SFH (${jurosInputText}% a.a. + TR)` : `AUTO PRICE (${jurosInputText}% a.m.)`;
+    doc.text(`FINANCIAMENTO ${tipoFinancTexto} - ${prazoFinanc} MESES:`, 22, 125);
     doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
-    doc.text(`Parcela Mensal Estimada: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
+    doc.text(`Parcela Mensal Inicial: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
     doc.text(`Custo Acumulado Final com o Banco: ${formatarMoeda(totalFinanc)}`, 22, 140);
 
     doc.setFillColor(220, 252, 231); doc.rect(15, 162, 180, 18, 'F');
