@@ -70,11 +70,11 @@
             flex-wrap: wrap;
         }
         .tab-btn {
-            padding: 14px 24px;
+            padding: 14px 20px;
             background-color: white;
             border: 1px solid var(--card-border);
             border-radius: 12px 12px 0 0;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
@@ -247,11 +247,12 @@
 
 <div class="tabs-header">
     <button class="tab-btn active" onclick="trocarAba('abaSimulador', this)">📊 Simulador Comparativo</button>
-    <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca por Faixa de Parcela</button>
+    <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca Parcela (Auto/Imóvel)</button>
     <button class="tab-btn" onclick="trocarAba('abaPresencial', this)">🤝 Atendimento Presencial</button>
-    <button class="tab-btn" onclick="trocarAba('abaVeiculos', this)">🚗 O que Comprar (Modelos Fipe)</button>
-    <button class="tab-btn" onclick="trocarAba('abaFipeCliente', this)">📋 Consultar FIPE do Cliente</button>
-    <button class="tab-btn" onclick="trocarAba('abaServicos', this)">🛠️ Consórcio de Serviços</button>
+    <button class="tab-btn" onclick="trocarAba('abaVeiculos', this)">🚗 Modelos Fipe</button>
+    <button class="tab-btn" onclick="trocarAba('abaFipeCliente', this)">📋 FIPE do Cliente</button>
+    <button class="tab-btn" onclick="trocarAba('abaServicos', this)">🛠️ Proposta Serviços</button>
+    <button class="tab-btn" onclick="trocarAba('abaBuscaServicos', this)">🔎 Busca Parcela Serviços</button>
 </div>
 
 <!-- ABA 1: SIMULADOR COMPARATIVO -->
@@ -381,11 +382,11 @@
     </div>
 </div>
 
-<!-- ABA 2: BUSCA POR FAIXA DE PARCELA -->
+<!-- ABA 2: BUSCA POR FAIXA DE PARCELA (AUTO / IMÓVEL) -->
 <div id="abaBusca" class="tab-content">
     <div class="container-full">
         <div class="card">
-            <h2>Estudo de Parcelas Personalizado</h2>
+            <h2>Estudo de Parcelas Personalizado (Auto / Imóvel)</h2>
             <div class="row-4">
                 <div class="form-group">
                     <label for="buscaMin">Parcela Mínima (R$)</label>
@@ -697,7 +698,7 @@
     </div>
 </div>
 
-<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (COM CAMPOS EXCLUSIVOS E MARCA D'ÁGUA NO RODAPÉ) -->
+<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (PROPOSTA INDIVIDUAL CLEAN) -->
 <div id="abaServicos" class="tab-content">
     <div class="container">
         <div class="card">
@@ -720,7 +721,7 @@
             <h2 class="section-divider">Simulação de Consórcio de Serviços (58 Meses)</h2>
             
             <div class="form-group">
-                <label for="sTipoServico">Tipo / Objetivo do Serviço (Muda o Visual do PDF)</label>
+                <label for="sTipoServico">Tipo / Objetivo do Serviço</label>
                 <select id="sTipoServico">
                     <option value="Cirurgia Plástica / Procedimento Estético" selected>Cirurgia Plástica / Procedimento Estético</option>
                     <option value="Viagens, Passagens & Intercâmbio">Viagens, Passagens & Intercâmbio</option>
@@ -750,7 +751,7 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn-pdf" onclick="exportarPDFServicos()">📄 Gerar Proposta Personalizada PDF (Visual Clean)</button>
+                <button class="btn-pdf" onclick="exportarPDFServicos()">📄 Gerar Proposta Individual PDF (100% Clean)</button>
             </div>
         </div>
 
@@ -782,6 +783,54 @@
                         <td><strong>Garantia Exigida</strong></td>
                         <td>Avalista com renda (3x parcela) ou Imóvel / Veículo</td>
                     </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 7: BUSCA DE SERVIÇOS POR FAIXA DE PARCELA (NOVA ABA PEDIDA) -->
+<div id="abaBuscaServicos" class="tab-content">
+    <div class="container-full">
+        <div class="card">
+            <h2>Estudo de Serviços por Faixa de Parcela</h2>
+            <div class="row-3">
+                <div class="form-group">
+                    <label for="sBuscaMin">Parcela Mínima (R$)</label>
+                    <input type="number" id="sBuscaMin" value="300" oninput="filtrarServicosPorParcela()">
+                </div>
+                <div class="form-group">
+                    <label for="sBuscaMax">Parcela Máxima (R$)</label>
+                    <input type="number" id="sBuscaMax" value="400" oninput="filtrarServicosPorParcela()">
+                </div>
+                <div class="form-group">
+                    <label for="sBuscaObjetivo">Objetivo do Cliente</label>
+                    <select id="sBuscaObjetivo" onchange="filtrarServicosPorParcela()">
+                        <option value="Cirurgia Plástica / Procedimento Estético" selected>Cirurgia Plástica / Procedimento Estético</option>
+                        <option value="Viagens & Intercâmbio">Viagens & Intercâmbio</option>
+                        <option value="Reforma & Construção">Reforma & Construção</option>
+                        <option value="Festas & Formaturas">Festas & Formaturas</option>
+                        <option value="Serviços Gerais">Serviços Gerais</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-group" style="margin-top: 10px;">
+                <button class="btn-pdf" onclick="exportarPDFTabelaServicosFiltrada()">📄 Imprimir Tabela de Serviços Filtrada (PDF)</button>
+            </div>
+
+            <table class="table-results" id="tabelaServicosBusca">
+                <thead>
+                    <tr>
+                        <th>Código Tabela</th>
+                        <th>Descrição</th>
+                        <th>Prazo</th>
+                        <th>Valor do Crédito</th>
+                        <th>Valor da Parcela (58x)</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabelaServicosBusca">
+                    <!-- Preenchido via JS -->
                 </tbody>
             </table>
         </div>
@@ -915,6 +964,7 @@ const catalogoVeiculos = [
 let chartInstance = null;
 let base64Logo = null;
 let resultadosFiltradosCache = [];
+let resultadosServicosFiltradosCache = [];
 let fipeValorNumCache = 0;
 
 function sincronizarCamposGerais(origem, valor) {
@@ -948,6 +998,8 @@ function trocarAba(idAba, btn) {
         fipeCarregarMarcas();
     } else if(idAba === 'abaServicos') {
         carregarOpcoesServico();
+    } else if(idAba === 'abaBuscaServicos') {
+        filtrarServicosPorParcela();
     }
 }
 
@@ -1462,11 +1514,11 @@ function fipeUsarComoLance() {
         document.getElementById("pValorLance").value = fipeValorNumCache;
         calcularTudo();
         pAtualizarLanceReais();
-        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} applied com sucesso como lance nas simulações!`);
+        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} aplicado com sucesso como lance nas simulações!`);
     }
 }
 
-/* ABA DE SERVIÇOS E IMPRESSÃO COM MARCA D'ÁGUA NO RODAPÉ */
+/* PROPOSTA INDIVIDUAL DE SERVIÇOS (100% CLEAN - SEM DESENHOS / IMAGENS DE FUNDO) */
 function carregarOpcoesServico() {
     const sel = document.getElementById("sCredito");
     sel.innerHTML = "";
@@ -1505,39 +1557,6 @@ function exportarPDFServicos() {
 
     const dataHoje = new Date();
     const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
-
-    // --- MARCA D'ÁGUA SUAVE NO CANTO INFERIOR DIREITO (RODAPÉ) ---
-    const desenharIconeRodapeClean = () => {
-        doc.setLineWidth(0.5);
-        doc.setDrawColor(203, 213, 225); // Cor cinza suave / slate light
-
-        if (tipoServico.includes("Viagens")) {
-            // Desenho do Avião sutil no rodapé direito
-            doc.line(160, 255, 188, 255);
-            doc.line(174, 240, 188, 255);
-            doc.line(174, 270, 188, 255);
-            doc.line(160, 255, 152, 248);
-            doc.line(160, 255, 152, 262);
-        } else if (tipoServico.includes("Reforma") || tipoServico.includes("Construção")) {
-            // Desenho de Casa/Edificação sutil no rodapé direito
-            doc.line(155, 265, 175, 245);
-            doc.line(175, 245, 195, 265);
-            doc.line(160, 265, 160, 275);
-            doc.line(190, 265, 190, 275);
-            doc.line(160, 275, 190, 275);
-        } else if (tipoServico.includes("Cirurgia") || tipoServico.includes("Estético") || tipoServico.includes("Médicos")) {
-            // Símbolo de Saúde / Cuidado sutil no rodapé direito
-            doc.circle(175, 258, 14, 'S');
-            doc.line(175, 248, 175, 268);
-            doc.line(165, 258, 185, 258);
-        } else {
-            // Celebração / Estrela / Gerais
-            doc.circle(175, 258, 15, 'S');
-            doc.circle(175, 258, 10, 'S');
-        }
-    };
-
-    desenharIconeRodapeClean();
 
     // CABEÇALHO CLEAN
     doc.setFillColor(11, 35, 65);
@@ -1620,6 +1639,114 @@ function exportarPDFServicos() {
     doc.text(`Página 1 de 1`, 195, 287, {align: "right"});
 
     doc.save(`proposta comauto servicos - ${cliente}.pdf`);
+}
+
+/* FILTRO E IMPRESSÃO DE TABELA DE SERVIÇOS POR FAIXA DE PARCELA */
+function filtrarServicosPorParcela() {
+    const vMin = parseFloat(document.getElementById("sBuscaMin").value) || 0;
+    const vMax = parseFloat(document.getElementById("sBuscaMax").value) || 999999;
+    const tbody = document.getElementById("corpoTabelaServicosBusca");
+    
+    tbody.innerHTML = "";
+    resultadosServicosFiltradosCache = [];
+
+    tabelaServicos.forEach(item => {
+        if (item.parcela >= vMin && item.parcela <= vMax) {
+            resultadosServicosFiltradosCache.push(item);
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${item.codigo}</strong></td>
+                <td>${item.desc}</td>
+                <td>58 meses</td>
+                <td>R$ ${item.credito.toLocaleString('pt-BR')},00</td>
+                <td><strong style="color:var(--comauto-blue);">${formatarMoeda(item.parcela)}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+
+    if (resultadosServicosFiltradosCache.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhum plano de serviço encontrado nessa faixa de parcela. Tente ajustar os valores.</td></tr>`;
+    }
+}
+
+function exportarPDFTabelaServicosFiltrada() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const dataHoje = new Date();
+    const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
+
+    const cliente = document.getElementById("sNomeCliente").value || "Cliente";
+    const consultor = document.getElementById("sNomeConsultor").value || "Amanda Peraccini";
+    const telConsultor = document.getElementById("sTelConsultor").value || "";
+    const vMin = document.getElementById("sBuscaMin").value;
+    const vMax = document.getElementById("sBuscaMax").value;
+    const objetivo = document.getElementById("sBuscaObjetivo").value;
+
+    doc.setFillColor(11, 35, 65);
+    doc.rect(0, 0, 210, 5, 'F');
+    
+    if (base64Logo) {
+        doc.addImage(base64Logo, 'PNG', 15, 12, 45, 25);
+    } else {
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(11, 35, 65);
+        doc.text("COMAUTO CONSÓRCIO", 15, 25);
+    }
+    
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(11, 35, 65);
+    doc.text("ESTUDO DE CONSÓRCIO DE SERVIÇOS", 110, 23, {align: "left"});
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Opções de Parcelas de Serviços | Tabela Vigente 2026`, 110, 30, {align: "left"});
+    
+    doc.setDrawColor(241, 245, 249);
+    doc.line(15, 42, 195, 42);
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(11, 35, 65);
+    doc.text(`CLIENTE: ${cliente.toUpperCase()} | Consultor: ${consultor}`, 15, 52);
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
+    doc.text(`Objetivo: ${objetivo} | Faixa de Parcela: R$ ${vMin},00 até R$ ${vMax},00 | Data: ${dataFormatada}`, 15, 58);
+
+    let y = 70;
+    doc.setFillColor(248, 250, 252);
+    doc.rect(15, y, 180, 10, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
+    doc.text("CÓDIGO", 18, y + 6.5);
+    doc.text("DESCRIÇÃO", 50, y + 6.5);
+    doc.text("PRAZO", 90, y + 6.5);
+    doc.text("CRÉDITO TOTAL", 120, y + 6.5);
+    doc.text("PARCELA MENSAL", 160, y + 6.5);
+
+    y += 12;
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
+
+    resultadosServicosFiltradosCache.forEach(item => {
+        doc.text(item.codigo, 18, y);
+        doc.text(item.desc, 50, y);
+        doc.text("58 Meses", 90, y);
+        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 120, y);
+        doc.setFont("Helvetica", "bold");
+        doc.text(`${formatarMoeda(item.parcela)}`, 160, y);
+        doc.setFont("Helvetica", "normal");
+        
+        doc.setDrawColor(241, 245, 249);
+        doc.line(15, y + 3, 195, y + 3);
+        y += 10;
+    });
+
+    // RODAPÉ
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, 280, 195, 280);
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
+    doc.text(`Consultor(a): ${consultor}`, 15, 287);
+    if(telConsultor) {
+        doc.text(` | Tel/WhatsApp: ${telConsultor}`, 85, 287);
+    }
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Página 1 de 1`, 195, 287, {align: "right"});
+
+    doc.save(`estudo comauto servicos - ${cliente} - R$${vMin} a R$${vMax}.pdf`);
 }
 
 function exportarPDFEstudoPersonalizado() {
