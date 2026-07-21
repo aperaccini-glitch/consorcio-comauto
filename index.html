@@ -246,17 +246,16 @@
 </div>
 
 <div class="tabs-header">
-    <button class="tab-btn active" onclick="trocarAba('abaSimulador', this)">📊 Simulador Comparativo</button>
+    <button class="tab-btn active" onclick="trocarAba('abaSimulador', this)">📊 Simulador de Proposta</button>
     <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca Parcela (Auto/Imóvel)</button>
     <button class="tab-btn" onclick="trocarAba('abaPresencial', this)">🤝 Atendimento Presencial</button>
     <button class="tab-btn" onclick="trocarAba('abaVeiculos', this)">🚗 Modelos Fipe</button>
     <button class="tab-btn" onclick="trocarAba('abaFipeCliente', this)">📋 FIPE do Cliente</button>
     <button class="tab-btn" onclick="trocarAba('abaServicos', this)">🛠️ Proposta Serviços</button>
     <button class="tab-btn" onclick="trocarAba('abaBuscaServicos', this)">🔎 Busca Parcela Serviços</button>
-    <button class="tab-btn" onclick="trocarAba('abaPropostaAlternativa', this)">💡 Proposta Crédito + Modelos</button>
 </div>
 
-<!-- ABA 1: SIMULADOR COMPARATIVO -->
+<!-- ABA 1: SIMULADOR DE PROPOSTA -->
 <div id="abaSimulador" class="tab-content active">
     <div class="container">
         <div class="card">
@@ -338,25 +337,67 @@
                 </div>
             </div>
 
-            <h2 class="section-divider">Mercado Bancário (Financiamento)</h2>
-            <div class="row">
+            <h2 class="section-divider">Configurar Conteúdo da Proposta PDF</h2>
+            <div class="form-group">
+                <label for="tipoConteudoPdf">Conteúdo a Incluir no PDF</label>
+                <select id="tipoConteudoPdf" onchange="alternarCamposPdf()">
+                    <option value="ambos" selected>Financiamento + Poder de Compra (Veículos FIPE)</option>
+                    <option value="financ">Apenas Comparativo com Financiamento Bancário</option>
+                    <option value="poderCompra">Apenas Poder de Compra (Veículos FIPE)</option>
+                </select>
+            </div>
+
+            <!-- FILTRO DE ANOS PARA O PDF -->
+            <div class="row" id="boxFiltroAnosPdf">
                 <div class="form-group">
-                    <label id="labelPrazoFinanc" for="prazoFinanciamento">Prazo do Financiamento Bancário</label>
-                    <select id="prazoFinanciamento" onchange="calcularTudo()"></select>
+                    <label for="pdfAnoDe">Ano Inicial Veículos (FIPE)</label>
+                    <select id="pdfAnoDe">
+                        <option value="2014" selected>2014</option>
+                        <option value="2015">2015</option>
+                        <option value="2016">2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label id="labelJurosFinanc" for="jurosFinanc">Taxa Juros Banco (% a.m.)</label>
-                    <input type="number" id="jurosFinanc" value="2.00" step="0.01" oninput="calcularTudo()">
+                    <label for="pdfAnoAte">Ano Final Veículos (FIPE)</label>
+                    <select id="pdfAnoAte">
+                        <option value="2014">2014</option>
+                        <option value="2015">2015</option>
+                        <option value="2016" selected>2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2026">2026 (0km)</option>
+                    </select>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="entradaFinanc">Valor de Entrada no Banco (R$)</label>
-                <input type="number" id="entradaFinanc" value="0" oninput="calcularTudo()">
+
+            <!-- DADOS BANCÁRIOS (SÓ APARECE SE FINANCIAMENTO ESTIVER ATIVO) -->
+            <div id="boxFinanciamento">
+                <h2 class="section-divider">Mercado Bancário (Financiamento)</h2>
+                <div class="row">
+                    <div class="form-group">
+                        <label id="labelPrazoFinanc" for="prazoFinanciamento">Prazo do Financiamento Bancário</label>
+                        <select id="prazoFinanciamento" onchange="calcularTudo()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label id="labelJurosFinanc" for="jurosFinanc">Taxa Juros Banco (% a.m.)</label>
+                        <input type="number" id="jurosFinanc" value="2.00" step="0.01" oninput="calcularTudo()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="entradaFinanc">Valor de Entrada no Banco (R$)</label>
+                    <input type="number" id="entradaFinanc" value="0" oninput="calcularTudo()">
+                </div>
             </div>
 
             <div class="btn-group">
                 <button class="btn-calc" onclick="calcularTudo()">📊 Atualizar Dados</button>
-                <button class="btn-pdf" onclick="exportarPDFPropostaViva()">📄 Imprimir Proposta PDF</button>
+                <button class="btn-pdf" onclick="exportarPDFPropostaViva()">📄 Imprimir Proposta PDF Personalizada</button>
             </div>
         </div>
 
@@ -699,7 +740,7 @@
     </div>
 </div>
 
-<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (PROPOSTA INDIVIDUAL CLEAN) -->
+<!-- ABA 6: CONSÓRCIO DE SERVIÇOS -->
 <div id="abaServicos" class="tab-content">
     <div class="container">
         <div class="card">
@@ -838,68 +879,6 @@
     </div>
 </div>
 
-<!-- ABA 8: PROPOSTA ALTERNATIVA (CRÉDITO + MODELOS COMPATÍVEIS) -->
-<div id="abaPropostaAlternativa" class="tab-content">
-    <div class="container">
-        <div class="card">
-            <h2>Proposta Alternativa - Poder de Compra</h2>
-            
-            <div class="row">
-                <div class="form-group">
-                    <label for="altGrupo">Grupo / Categoria</label>
-                    <select id="altGrupo" onchange="altAtualizarOpcoes()">
-                        <option value="1648" selected>Grupo 1648 (68 Meses) - Auto</option>
-                        <option value="1644">Grupo 1644 (58 Meses) - Auto</option>
-                        <option value="1647">Grupo 1647 (94 Meses) - Auto</option>
-                        <option value="1642">Grupo 1642 (50 Meses) - Auto</option>
-                        <option value="1641">Grupo 1641 (44 Meses) - Auto</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="altModalidade">Modalidade da Parcela</label>
-                    <select id="altModalidade" onchange="altCalcular()">
-                        <option value="leve" selected>Parcela Leve (50%)</option>
-                        <option value="linear">Parcela Linear (100%)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group">
-                    <label for="altCredito">Valor do Crédito</label>
-                    <select id="altCredito" onchange="altCalcular()"></select>
-                </div>
-                <div class="form-group">
-                    <label for="altCategoria">Filtro de Categoria dos Carros</label>
-                    <select id="altCategoria" onchange="altCalcular()">
-                        <option value="todos" selected>Todas as Categorias</option>
-                        <option value="Hatch">Apenas Hatch</option>
-                        <option value="Sedan">Apenas Sedan</option>
-                        <option value="SUV">Apenas SUV</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="result-box highlight" style="margin-top:15px;">
-                <div class="res-label" style="color: var(--comauto-blue);">Resumo da Proposta de Crédito</div>
-                <div class="res-val" id="altResParcela" style="color: var(--comauto-blue);">R$ 0,00 /mês</div>
-                <div class="res-desc" id="altResDescricao"></div>
-            </div>
-
-            <div class="btn-group">
-                <button class="btn-pdf" onclick="exportarPDFPropostaAlternativa()">📄 Gerar PDF (Crédito + Vitrine de Modelos)</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Modelos Que Seu Cliente Pode Comprar</h2>
-            <div id="altContainerModelos" style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:5px;">
-                <!-- Preenchido via JS -->
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 // BANCO DE DADOS ATUALIZADO CONFORME TABELAS OFICIAIS DE 20/07/2026
 const bancoDadosComauto = {
@@ -1028,8 +1007,24 @@ let chartInstance = null;
 let base64Logo = null;
 let resultadosFiltradosCache = [];
 let resultadosServicosFiltradosCache = [];
-let altModelosCache = [];
 let fipeValorNumCache = 0;
+
+function alternarCamposPdf() {
+    const modo = document.getElementById("tipoConteudoPdf").value;
+    const boxFinanc = document.getElementById("boxFinanciamento");
+    const boxAnos = document.getElementById("boxFiltroAnosPdf");
+
+    if (modo === "financ") {
+        boxFinanc.style.display = "block";
+        boxAnos.style.display = "none";
+    } else if (modo === "poderCompra") {
+        boxFinanc.style.display = "none";
+        boxAnos.style.display = "flex";
+    } else { // ambos
+        boxFinanc.style.display = "block";
+        boxAnos.style.display = "flex";
+    }
+}
 
 function sincronizarCamposGerais(origem, valor) {
     if (origem === 'nomeCliente' || origem === 'sNomeCliente') {
@@ -1064,8 +1059,6 @@ function trocarAba(idAba, btn) {
         carregarOpcoesServico();
     } else if(idAba === 'abaBuscaServicos') {
         filtrarServicosPorParcela();
-    } else if(idAba === 'abaPropostaAlternativa') {
-        altAtualizarOpcoes();
     }
 }
 
@@ -1815,174 +1808,6 @@ function exportarPDFTabelaServicosFiltrada() {
     doc.save(`estudo comauto servicos - ${cliente} - R$${vMin} a R$${vMax}.pdf`);
 }
 
-/* ABA 8: LÓGICA E PDF DA PROPOSTA ALTERNATIVA (CRÉDITO + MODELOS FIPE) */
-function altAtualizarOpcoes() {
-    const gId = document.getElementById("altGrupo").value;
-    const selCredito = document.getElementById("altCredito");
-    const plano = bancoDadosComauto[gId];
-
-    selCredito.innerHTML = "";
-    if (plano && plano.PF) {
-        Object.keys(plano.PF).forEach(credito => {
-            let opt = document.createElement("option");
-            opt.value = credito;
-            opt.textContent = `R$ ${parseInt(credito).toLocaleString('pt-BR')},00`;
-            selCredito.appendChild(opt);
-        });
-    }
-    altCalcular();
-}
-
-function altCalcular() {
-    const gId = document.getElementById("altGrupo").value;
-    const modalidade = document.getElementById("altModalidade").value;
-    const credito = parseFloat(document.getElementById("altCredito").value) || 0;
-    const categoria = document.getElementById("altCategoria").value;
-
-    if(!credito) return;
-
-    const plano = bancoDadosComauto[gId];
-    const prazo = plano.prazo;
-    const valorParcela = plano.PF[credito][modalidade] || plano.PF[credito]["linear"];
-    const nomeModalidade = modalidade === 'leve' ? 'Parcela Leve (50%)' : 'Parcela Linear (100%)';
-
-    document.getElementById("altResParcela").textContent = `${formatarMoeda(valorParcela)} /mês`;
-    document.getElementById("altResDescricao").innerHTML = `
-        Crédito Contratado: <strong>${formatarMoeda(credito)}</strong> | Prazo: <strong>${prazo} Meses</strong><br>
-        Modalidade: <strong>${nomeModalidade}</strong>
-    `;
-
-    // Filtrar modelos compatíveis no mercado
-    const container = document.getElementById("altContainerModelos");
-    container.innerHTML = "";
-    altModelosCache = catalogoVeiculos.filter(c => {
-        const atendePreco = c.preco <= (credito * 1.15);
-        const atendeCat = categoria === "todos" || c.categoria === categoria;
-        return atendePreco && atendeCat;
-    });
-
-    if(altModelosCache.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Nenhum veículo compatível encontrado para essa faixa de valor.</div>`;
-        return;
-    }
-
-    altModelosCache.forEach(carro => {
-        const div = document.createElement("div");
-        div.style.cssText = "background:#f8fafc; border:1px solid #f1f5f9; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;";
-        div.innerHTML = `
-            <div>
-                <strong style="color:var(--comauto-blue); font-size:14px;">${carro.nome}</strong>
-                <div style="font-size:11px; color:var(--text-muted);">Ano Modelo ${carro.ano} • Categoria ${carro.categoria}</div>
-            </div>
-            <strong style="color:var(--success-green); font-size:14px;">${formatarMoeda(carro.preco)}</strong>
-        `;
-        container.appendChild(div);
-    });
-}
-
-function exportarPDFPropostaAlternativa() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const cliente = document.getElementById("nomeCliente").value || "Cliente";
-    const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
-    const telConsultor = document.getElementById("telConsultor").value || "";
-    
-    const gId = document.getElementById("altGrupo").value;
-    const modalidade = document.getElementById("altModalidade").value;
-    const credito = parseFloat(document.getElementById("altCredito").value) || 0;
-    const plano = bancoDadosComauto[gId];
-    const prazo = plano.prazo;
-    const valorParcela = plano.PF[credito][modalidade] || plano.PF[credito]["linear"];
-    const nomeModalidade = modalidade === 'leve' ? 'Parcela Leve (50%)' : 'Parcela Linear (100%)';
-
-    const dataHoje = new Date();
-    const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
-
-    // CABEÇALHO CLEAN
-    doc.setFillColor(11, 35, 65);
-    doc.rect(0, 0, 210, 5, 'F');
-
-    if (base64Logo) {
-        doc.addImage(base64Logo, 'PNG', 15, 12, 45, 25);
-    } else {
-        doc.setFont("Helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(11, 35, 65);
-        doc.text("COMAUTO CONSÓRCIO", 15, 25);
-    }
-
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(11, 35, 65);
-    doc.text("PROPOSTA ALTERNATIVA DE CRÉDITO", 110, 23, {align: "left"});
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text(`Simulação de Poder de Compra | Tabela Vigente 2026`, 110, 30, {align: "left"});
-
-    doc.setDrawColor(241, 245, 249);
-    doc.line(15, 42, 195, 42);
-
-    // BOX CLIENTE
-    doc.setFillColor(248, 250, 252); doc.rect(15, 48, 180, 22, 'F');
-    doc.setDrawColor(226, 232, 240); doc.rect(15, 48, 180, 22, 'S');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text(`CLIENTE: ${cliente.toUpperCase()}`, 22, 58);
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text(`Emissão: ${dataFormatada} | Grupo ${gId} (${prazo} Meses)`, 22, 65);
-
-    // DESTAQUE CRÉDITO E PARCELA
-    doc.setFillColor(236, 253, 245); doc.rect(15, 76, 180, 28, 'F');
-    doc.setDrawColor(187, 247, 208); doc.rect(15, 76, 180, 28, 'S');
-
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(16, 185, 129);
-    doc.text("VALOR DO CRÉDITO DISPONÍVEL", 22, 86);
-    doc.setFontSize(16); doc.setTextColor(11, 35, 65);
-    doc.text(`${formatarMoeda(credito)}`, 22, 96);
-
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(16, 185, 129);
-    doc.text(`PARCELA MENSAL (${nomeModalidade.toUpperCase()})`, 115, 86);
-    doc.setFontSize(16); doc.setTextColor(11, 35, 65);
-    doc.text(`${formatarMoeda(valorParcela)} /mês`, 115, 96);
-
-    // TABELA DE MODELOS COMPATÍVEIS
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text("Opções de Veículos Compatíveis com este Crédito (Tabela FIPE)", 15, 115);
-
-    let y = 125;
-    doc.setFillColor(248, 250, 252);
-    doc.rect(15, y, 180, 9, 'F');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
-    doc.text("MODELO DE VEÍCULO", 20, y + 6);
-    doc.text("ANO MODELO", 100, y + 6);
-    doc.text("CATEGORIA", 130, y + 6);
-    doc.text("MÉDIA FIPE", 165, y + 6);
-
-    y += 11;
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
-
-    altModelosCache.slice(0, 12).forEach(c => {
-        doc.text(c.nome, 20, y);
-        doc.text(`Ano ${c.ano}`, 100, y);
-        doc.text(c.categoria, 130, y);
-        doc.setFont("Helvetica", "bold");
-        doc.text(`${formatarMoeda(c.preco)}`, 165, y);
-        doc.setFont("Helvetica", "normal");
-
-        doc.setDrawColor(241, 245, 249);
-        doc.line(15, y + 2, 195, y + 2);
-        y += 9;
-    });
-
-    // RODAPÉ
-    doc.setDrawColor(226, 232, 240);
-    doc.line(15, 280, 195, 280);
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
-    doc.text(`Consultor(a): ${consultor}`, 15, 287);
-    if(telConsultor) {
-        doc.text(` | Tel/WhatsApp: ${telConsultor}`, 85, 287);
-    }
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text(`Página 1 de 1`, 195, 287, {align: "right"});
-
-    doc.save(`proposta alternativa comauto - ${cliente}.pdf`);
-}
-
 function exportarPDFEstudoPersonalizado() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -2108,6 +1933,10 @@ function exportarPDFPropostaViva() {
     const jurosInputText = document.getElementById("jurosFinanc").value;
     const taxaAdmInserida = parseFloat(document.getElementById("taxaAdm").value) || 15;
     
+    const modoConteudo = document.getElementById("tipoConteudoPdf").value; // 'ambos', 'financ', 'poderCompra'
+    const pdfAnoDe = parseInt(document.getElementById("pdfAnoDe").value) || 2014;
+    const pdfAnoAte = parseInt(document.getElementById("pdfAnoAte").value) || 2016;
+
     const plano = bancoDadosComauto[grupo];
     const prazo = plano.prazo;
     
@@ -2180,7 +2009,7 @@ function exportarPDFPropostaViva() {
         doc.text(`Página ${pagina} de ${totalPaginas}`, 195, 287, {align: "right"});
     };
 
-    // --- PÁGINA 1 ---
+    // --- PÁGINA 1: ESTRUTURA PRINCIPAL ---
     aplicarCabecalho("PROPOSTA DE CONSÓRCIO", "Planejamento Inteligente de Ativos");
     
     doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
@@ -2222,35 +2051,83 @@ function exportarPDFPropostaViva() {
         doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 11;
     });
 
-    // --- PÁGINA 2 ---
-    doc.addPage();
-    aplicarCabecalho("ANÁLISE DE CUSTO-BENEFÍCIO", "Consórcio Comauto vs Financiamento");
-    
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text("COMPARATIVO DE CUSTO REAL ABSOLUTO", 15, 58);
-    
-    doc.setFillColor(248, 250, 252); doc.rect(15, 72, 180, 32, 'F');
-    doc.setDrawColor(234, 242, 248); doc.rect(15, 72, 180, 32, 'S');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.text("SISTEMA DE CONSÓRCIO COMAUTO:", 22, 83);
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(71, 85, 105);
-    doc.text(`Parcela Mensal Contratada: ${formatarMoeda(parcelaC)}/mês`, 22, 91);
-    doc.text(`Custo Total do Contrato de Tabela: ${formatarMoeda(totalConsorcioAteFim)}`, 22, 98);
+    // --- SEÇÃO DE FINANCIAMENTO (SE ATIVADO) ---
+    if (modoConteudo === 'ambos' || modoConteudo === 'financ') {
+        doc.addPage();
+        aplicarCabecalho("ANÁLISE DE CUSTO-BENEFÍCIO", "Consórcio Comauto vs Financiamento");
+        
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+        doc.text("COMPARATIVO DE CUSTO REAL ABSOLUTO", 15, 58);
+        
+        doc.setFillColor(248, 250, 252); doc.rect(15, 72, 180, 32, 'F');
+        doc.setDrawColor(234, 242, 248); doc.rect(15, 72, 180, 32, 'S');
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.text("SISTEMA DE CONSÓRCIO COMAUTO:", 22, 83);
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(71, 85, 105);
+        doc.text(`Parcela Mensal Contratada: ${formatarMoeda(parcelaC)}/mês`, 22, 91);
+        doc.text(`Custo Total do Contrato de Tabela: ${formatarMoeda(totalConsorcioAteFim)}`, 22, 98);
 
-    doc.setFillColor(248, 250, 252); doc.rect(15, 114, 180, 32, 'F');
-    doc.setDrawColor(226, 232, 240); doc.rect(15, 114, 180, 32, 'S');
-    doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
-    const tipoFinancTexto = grupo === "51" ? `IMOBILIÁRIO SFH (${jurosInputText}% a.a. + TR)` : `AUTO PRICE (${jurosInputText}% a.m.)`;
-    doc.text(`FINANCIAMENTO ${tipoFinancTexto} - ${prazoFinanc} MESES:`, 22, 125);
-    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
-    doc.text(`Parcela Mensal Inicial: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
-    doc.text(`Custo Acumulado Final com o Banco: ${formatarMoeda(totalFinanc)}`, 22, 140);
+        doc.setFillColor(248, 250, 252); doc.rect(15, 114, 180, 32, 'F');
+        doc.setDrawColor(226, 232, 240); doc.rect(15, 114, 180, 32, 'S');
+        doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
+        const tipoFinancTexto = grupo === "51" ? `IMOBILIÁRIO SFH (${jurosInputText}% a.a. + TR)` : `AUTO PRICE (${jurosInputText}% a.m.)`;
+        doc.text(`FINANCIAMENTO ${tipoFinancTexto} - ${prazoFinanc} MESES:`, 22, 125);
+        doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
+        doc.text(`Parcela Mensal Inicial: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
+        doc.text(`Custo Acumulado Final com o Banco: ${formatarMoeda(totalFinanc)}`, 22, 140);
 
-    doc.setFillColor(220, 252, 231); doc.rect(15, 162, 180, 18, 'F');
-    doc.setDrawColor(187, 247, 208); doc.rect(15, 162, 180, 18, 'S');
-    doc.setTextColor(21, 128, 61); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
-    doc.text(`ECONOMIA LÍQUIDA GERADA PARA O CLIENTE: ${formatarMoeda(economiaTotal)}`, 22, 173);
+        doc.setFillColor(220, 252, 231); doc.rect(15, 162, 180, 18, 'F');
+        doc.setDrawColor(187, 247, 208); doc.rect(15, 162, 180, 18, 'S');
+        doc.setTextColor(21, 128, 61); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
+        doc.text(`ECONOMIA LÍQUIDA GERADA PARA O CLIENTE: ${formatarMoeda(economiaTotal)}`, 22, 173);
+    }
 
-    // --- PÁGINA 3 ---
+    // --- SEÇÃO DE PODER DE COMPRA / VEÍCULOS (SE ATIVADO) ---
+    if (modoConteudo === 'ambos' || modoConteudo === 'poderCompra') {
+        doc.addPage();
+        aplicarCabecalho("ESTUDO DE PODER DE COMPRA", `Modelos Sugeridos no Mercado FIPE`);
+        
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+        doc.text(`VEÍCULOS COMPATÍVEIS COM O CRÉDITO DE ${formatarMoeda(credito)}`, 15, 58);
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+        doc.text(`Filtro aplicado: Veículos entre o ano ${pdfAnoDe} e ${pdfAnoAte}`, 15, 65);
+
+        const modelosFiltrados = catalogoVeiculos.filter(c => {
+            const atendePreco = c.preco <= (credito * 1.15);
+            const atendeAno = c.ano >= pdfAnoDe && c.ano <= pdfAnoAte;
+            return atendePreco && atendeAno;
+        });
+
+        let yCar = 78;
+        doc.setFillColor(248, 250, 252);
+        doc.rect(15, yCar, 180, 9, 'F');
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
+        doc.text("MODELO DO VEÍCULO", 20, yCar + 6);
+        doc.text("ANO MODELO", 105, yCar + 6);
+        doc.text("CATEGORIA", 135, yCar + 6);
+        doc.text("MÉDIA FIPE ESTIMADA", 165, yCar + 6);
+
+        yCar += 12;
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
+
+        if(modelosFiltrados.length === 0) {
+            doc.text("Nenhum veículo encontrado no catálogo para o filtro de ano selecionado.", 20, yCar);
+        } else {
+            modelosFiltrados.slice(0, 15).forEach(c => {
+                doc.text(c.nome, 20, yCar);
+                doc.text(`Ano ${c.ano}`, 105, yCar);
+                doc.text(c.categoria, 135, yCar);
+                doc.setFont("Helvetica", "bold");
+                doc.text(`${formatarMoeda(c.preco)}`, 165, yCar);
+                doc.setFont("Helvetica", "normal");
+
+                doc.setDrawColor(241, 245, 249);
+                doc.line(15, yCar + 2, 195, yCar + 2);
+                yCar += 9;
+            });
+        }
+    }
+
+    // --- RECALCULO DE LANCE ---
     doc.addPage();
     aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
     
@@ -2318,6 +2195,7 @@ function exportarPDFPropostaViva() {
 
 // Inicializar Aplicativo
 atualizarCampos();
+alternarCamposPdf();
 </script>
 </body>
 </html>
