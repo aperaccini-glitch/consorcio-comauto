@@ -205,9 +205,9 @@
         
         .chart-container { position: relative; margin-top: 35px; height: 300px; }
 
-        .table-results { width: 100%; border-collapse: collapse; margin-top: 25px; }
-        .table-results th { background-color: var(--bg-main); color: var(--comauto-blue); font-size: 12px; font-weight: 700; text-transform: uppercase; padding: 14px; text-align: left; border-bottom: 2px solid var(--card-border); }
-        .table-results td { padding: 14px; border-bottom: 1px solid var(--card-border); font-size: 14px; color: var(--text-main); }
+        .table-results { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table-results th { background-color: var(--bg-main); color: var(--comauto-blue); font-size: 12px; font-weight: 700; text-transform: uppercase; padding: 12px; text-align: left; border-bottom: 2px solid var(--card-border); }
+        .table-results td { padding: 12px; border-bottom: 1px solid var(--card-border); font-size: 13px; color: var(--text-main); }
         .table-results tr:hover { background-color: #f8fafc; }
         .badge-leve { background-color: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
         .badge-linear { background-color: #e0f2fe; color: #075985; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
@@ -222,20 +222,9 @@
         .calc-btn.equal { background: var(--comauto-blue); color: white; border-color: var(--comauto-blue); }
         .calc-btn.clear { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
 
-        /* CARDS DE VEÍCULOS SUGERIDOS */
-        .car-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-        .car-card {
-            background: #fff;
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
+        /* CARDS DE VEÍCULOS */
+        .car-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 25px; }
+        .car-card { background: #fff; border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .car-card:hover { border-color: var(--comauto-blue); transform: translateY(-2px); }
         .car-title { font-size: 16px; font-weight: 800; color: var(--comauto-blue); margin: 0 0 6px 0; }
         .car-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 12px; }
@@ -277,6 +266,10 @@
                     <label for="nomeConsultor">Nome do Consultor(a)</label>
                     <input type="text" id="nomeConsultor" value="Amanda Peraccini">
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="telConsultor">Telefone / WhatsApp do Consultor(a)</label>
+                <input type="text" id="telConsultor" value="(00) 00000-0000" placeholder="(14) 99999-9999">
             </div>
 
             <h2 class="section-divider">Configuração do Consórcio</h2>
@@ -439,7 +432,7 @@
     </div>
 </div>
 
-<!-- ABA 3: ATENDIMENTO PRESENCIAL E SIMULAÇÃO DE LANCE RÁPIDO -->
+<!-- ABA 3: ATENDIMENTO PRESENCIAL -->
 <div id="abaPresencial" class="tab-content">
     <div class="container">
         <div class="card">
@@ -472,7 +465,7 @@
             <div class="row">
                 <div class="form-group">
                     <label for="pCredito">Valor do Crédito (R$)</label>
-                    <select id="pCredito" onchange="pCalcular()"></select>
+                    <select id="pCredito" onchange="pAtualizarCredito()"></select>
                 </div>
                 <div class="form-group">
                     <label for="pModalidade">Modalidade de Entrada</label>
@@ -484,17 +477,22 @@
             </div>
 
             <div class="section-divider"></div>
-            <h2>Ajuste Rápido de Lance Ofertado</h2>
+            <h2>Ofertar Lance (em Reais ou %)</h2>
 
             <div class="row">
                 <div class="form-group">
                     <label for="pValorLance">Lance em Reais (R$)</label>
-                    <input type="number" id="pValorLance" value="10000" oninput="pCalcular()">
+                    <input type="number" id="pValorLance" value="10000" oninput="pAtualizarLanceReais()">
                 </div>
                 <div class="form-group">
-                    <label for="pMesContemplacao">Mês Pretendido da Contemplação</label>
-                    <input type="number" id="pMesContemplacao" value="1" min="1" oninput="pCalcular()">
+                    <label for="pPctLance">Lance em Porcentagem (%)</label>
+                    <input type="number" id="pPctLance" value="33.33" step="0.1" oninput="pAtualizarLancePct()">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pMesContemplacao">Mês Pretendido da Contemplação</label>
+                <input type="number" id="pMesContemplacao" value="1" min="1" oninput="pCalcular()">
             </div>
 
             <div class="result-box highlight" style="margin-top:20px;">
@@ -502,6 +500,40 @@
                 <div class="res-val" id="pResNovaParcela" style="color: var(--success-green);">R$ 0,00 /mês</div>
                 <div class="res-desc" id="pResDescricao"></div>
             </div>
+
+            <!-- TABELA DE MODALIDADES DE ASSEMBLEIA -->
+            <h2 class="section-divider">Regras de Contemplação em Assembleia</h2>
+            <table class="table-results" style="margin-top:10px;">
+                <thead>
+                    <tr>
+                        <th>Modalidade</th>
+                        <th>Regra de Lance</th>
+                        <th>Característica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1ª Assembleia</strong></td>
+                        <td><span class="badge-linear">Lance Fixo 30%</span></td>
+                        <td>Oferta fixa de 30% do crédito para desempate entre ofertantes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2ª Assembleia</strong></td>
+                        <td><span class="badge-leve">Lance Limitado 50%</span></td>
+                        <td>Lance máximo permitido de até 50% do crédito total.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>3ª Assembleia</strong></td>
+                        <td><span class="badge-linear">Lance Livre</span></td>
+                        <td>Ofertante com maior percentual vence a contemplação.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Todas as Assembleias</strong></td>
+                        <td><span class="badge-leve">Sorteio</span></td>
+                        <td>Participação universal do grupo via Loteria Federal.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <div class="card">
@@ -536,28 +568,54 @@
     </div>
 </div>
 
-<!-- ABA 4: MODELOS DE VEÍCULOS COMPATÍVEIS POR CRÉDITO -->
+<!-- ABA 4: MODELOS DE VEÍCULOS COM INTERVALO DE ANOS (LIMITE 12 ANOS / 2014+) -->
 <div id="abaVeiculos" class="tab-content">
     <div class="container-full">
         <div class="card">
             <h2>Sugestão de Veículos Compatíveis no Mercado</h2>
-            <div class="row-3">
+            <div class="row-4">
                 <div class="form-group">
-                    <label for="vCredito">Valor do Crédito de Consórcio (R$)</label>
+                    <label for="vCredito">Valor do Crédito (R$)</label>
                     <input type="number" id="vCredito" value="30000" step="5000" oninput="buscarVeiculos()">
                 </div>
                 <div class="form-group">
-                    <label for="vAnosUso">Anos Máximos de Uso Aceitos</label>
-                    <select id="vAnosUso" onchange="buscarVeiculos()">
-                        <option value="12" selected>Até 12 Anos de Uso (Fabricação 2014+)</option>
-                        <option value="10">Até 10 Anos de Uso (Fabricação 2016+)</option>
-                        <option value="8">Até 8 Anos de Uso (Fabricação 2018+)</option>
-                        <option value="5">Até 5 Anos de Uso (Fabricação 2021+)</option>
-                        <option value="0">Apenas Veículos 0km</option>
+                    <label for="vAnoDe">Ano Inicial</label>
+                    <select id="vAnoDe" onchange="buscarVeiculos()">
+                        <option value="2014" selected>2014 (Limite 12 anos)</option>
+                        <option value="2015">2015</option>
+                        <option value="2016">2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="vCategoria">Categoria Desejada</label>
+                    <label for="vAnoAte">Ano Final</label>
+                    <select id="vAnoAte" onchange="buscarVeiculos()">
+                        <option value="2014">2014</option>
+                        <option value="2015">2015</option>
+                        <option value="2016" selected>2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026 (0km)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vCategoria">Categoria</label>
                     <select id="vCategoria" onchange="buscarVeiculos()">
                         <option value="todos">Todas as Categorias</option>
                         <option value="Hatch">Hatch / Compacto</option>
@@ -568,13 +626,11 @@
             </div>
 
             <div class="result-box" style="margin-top:10px; background-color:#f1f5f9;">
-                <div class="res-label">Poder de Compra</div>
-                <div class="res-desc" id="vResumoTexto">Mostrando opções de veículos seminovos/usados com valor de mercado médio próximo ao seu crédito.</div>
+                <div class="res-label">Poder de Compra (FIPE)</div>
+                <div class="res-desc" id="vResumoTexto">Mostrando opções de veículos com valor médio compatível ao crédito e intervalo de anos selecionado.</div>
             </div>
 
-            <div class="car-grid" id="containerCarros">
-                <!-- Preenchido via Javascript -->
-            </div>
+            <div class="car-grid" id="containerCarros"></div>
         </div>
     </div>
 </div>
@@ -655,7 +711,6 @@ const bancoDadosComauto = {
     }
 };
 
-// BANCO DE VEÍCULOS POPULARES MERCADO BRASILEIRO (ANO BASE 2026)
 const catalogoVeiculos = [
     { nome: "Fiat Palio 1.0 Fire Flex", ano: 2014, preco: 28500, categoria: "Hatch" },
     { nome: "VW Gol 1.0 Total Flex", ano: 2014, preco: 29900, categoria: "Hatch" },
@@ -666,18 +721,15 @@ const catalogoVeiculos = [
     { nome: "Chevrolet Classic 1.0 LS", ano: 2015, preco: 29500, categoria: "Sedan" },
     { nome: "Fiat Siena EL 1.0 Flex", ano: 2015, preco: 32500, categoria: "Sedan" },
     { nome: "Renault Logan 1.0 Authentique", ano: 2015, preco: 34000, categoria: "Sedan" },
-    
     { nome: "Hyundai HB20 1.0 Comfort", ano: 2016, preco: 42000, categoria: "Hatch" },
     { nome: "Chevrolet Onix 1.0 LT", ano: 2016, preco: 43500, categoria: "Hatch" },
     { nome: "Toyota Etios Hatch 1.3", ano: 2016, preco: 44000, categoria: "Hatch" },
     { nome: "VW Fox 1.6 Prime", ano: 2015, preco: 39000, categoria: "Hatch" },
-    { nome: "Chevrolet Prism 1.4 LT", ano: 2015, preco: 42500, categoria: "Sedan" },
+    { nome: "Chevrolet Prisma 1.4 LT", ano: 2015, preco: 42500, categoria: "Sedan" },
     { nome: "Ford Fiesta Sedan 1.6 SE", ano: 2015, preco: 38000, categoria: "Sedan" },
-    
     { nome: "Renault Duster 1.6 Dynamique", ano: 2015, preco: 48000, categoria: "SUV" },
     { nome: "Ford EcoSport 1.6 SE Flex", ano: 2015, preco: 47500, categoria: "SUV" },
     { nome: "Hyundai Tucson 2.0 GL", ano: 2014, preco: 45000, categoria: "SUV" },
-    
     { nome: "Fiat Argo 1.0 Drive", ano: 2018, preco: 54000, categoria: "Hatch" },
     { nome: "VW Polo 1.0 MPI", ano: 2018, preco: 57000, categoria: "Hatch" },
     { nome: "Toyota Yaris Hatch 1.3", ano: 2019, preco: 62000, categoria: "Hatch" },
@@ -685,7 +737,6 @@ const catalogoVeiculos = [
     { nome: "Nissan Kicks 1.6 S", ano: 2018, preco: 69000, categoria: "SUV" },
     { nome: "Jeep Renegade 1.8 Custom", ano: 2018, preco: 67000, categoria: "SUV" },
     { nome: "Hyundai Creta 1.6 Attitude", ano: 2018, preco: 72000, categoria: "SUV" },
-
     { nome: "Fiat Mobi Like 1.0 0km", ano: 2026, preco: 73000, categoria: "Hatch" },
     { nome: "Renault Kwid Zen 1.0 0km", ano: 2026, preco: 74000, categoria: "Hatch" },
     { nome: "Chevrolet Onix 1.0 0km", ano: 2026, preco: 89000, categoria: "Hatch" },
@@ -968,6 +1019,36 @@ function pAtualizarCampos() {
             selectCredito.appendChild(opt);
         });
     }
+    pAtualizarCredito();
+}
+
+function pAtualizarCredito() {
+    const credito = parseFloat(document.getElementById("pCredito").value) || 0;
+    const lance = parseFloat(document.getElementById("pValorLance").value) || 0;
+    if(credito > 0) {
+        const pct = (lance / credito) * 100;
+        document.getElementById("pPctLance").value = pct.toFixed(2);
+    }
+    pCalcular();
+}
+
+function pAtualizarLanceReais() {
+    const credito = parseFloat(document.getElementById("pCredito").value) || 0;
+    const lance = parseFloat(document.getElementById("pValorLance").value) || 0;
+    if(credito > 0) {
+        const pct = (lance / credito) * 100;
+        document.getElementById("pPctLance").value = pct.toFixed(2);
+    }
+    pCalcular();
+}
+
+function pAtualizarLancePct() {
+    const credito = parseFloat(document.getElementById("pCredito").value) || 0;
+    const pct = parseFloat(document.getElementById("pPctLance").value) || 0;
+    if(credito > 0) {
+        const lance = credito * (pct / 100);
+        document.getElementById("pValorLance").value = lance.toFixed(2);
+    }
     pCalcular();
 }
 
@@ -1035,31 +1116,31 @@ function calcEqual() {
     }
 }
 
-/* FUNÇÃO DE BUSCA DE VEÍCULOS (ABA 4) */
 function buscarVeiculos() {
     const credito = parseFloat(document.getElementById("vCredito").value) || 0;
-    const anosUsoMax = parseInt(document.getElementById("vAnosUso").value);
+    const anoDe = parseInt(document.getElementById("vAnoDe").value) || 2014;
+    const anoAte = parseInt(document.getElementById("vAnoAte").value) || 2026;
     const categoria = document.getElementById("vCategoria").value;
-    const anoAtual = 2026;
-    const anoMinimoFabricacao = anoAtual - anosUsoMax;
+    const limiteMinimoPermitido = 2014;
 
     const container = document.getElementById("containerCarros");
     container.innerHTML = "";
 
-    // Filtra veículos dentro do crédito (+15% de margem tolerável) e no ano de uso
     const compativeis = catalogoVeiculos.filter(carro => {
-        const atendeAno = anosUsoMax === 0 ? carro.ano === anoAtual : carro.ano >= anoMinimoFabricacao;
+        if (carro.ano < limiteMinimoPermitido) return false;
+
+        const atendeIntervaloAno = carro.ano >= anoDe && carro.ano <= anoAte;
         const atendePreco = carro.preco <= (credito * 1.15);
         const atendeCat = categoria === "todos" || carro.categoria === categoria;
-        return atendeAno && atendePreco && atendeCat;
+        return atendeIntervaloAno && atendePreco && atendeCat;
     });
 
     document.getElementById("vResumoTexto").innerHTML = `
-        Com um crédito de <strong>${formatarMoeda(credito)}</strong> e respeitando o limite de <strong>${anosUsoMax === 0 ? 'Veículos 0km' : 'até ' + anosUsoMax + ' anos de uso (Ano ' + anoMinimoFabricacao + '+)'}</strong>, seu cliente pode comprar opções como:
+        Com um crédito de <strong>${formatarMoeda(credito)}</strong>, filtrando do ano <strong>${anoDe} até ${anoAte}</strong> (respeitando o limite de até 12 anos de uso / a partir de 2014), seu cliente pode comprar opções como:
     `;
 
     if(compativeis.length === 0) {
-        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; color:var(--text-muted);">Nenhum veículo encontrado para este valor ou ano limite. Tente aumentar o valor do crédito ou os anos de uso.</div>`;
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; color:var(--text-muted);">Nenhum veículo encontrado para este valor, intervalo de anos ou categoria. Tente ajustar os filtros.</div>`;
         return;
     }
 
@@ -1090,6 +1171,7 @@ function exportarPDFEstudoPersonalizado() {
     const dataFormatada = `${dia}/${mes}/${ano}`;
 
     const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
+    const telConsultor = document.getElementById("telConsultor").value || "";
     const vMin = document.getElementById("buscaMin").value;
     const vMax = document.getElementById("buscaMax").value;
     const filtroMod = document.getElementById("buscaModalidade").value;
@@ -1097,6 +1179,18 @@ function exportarPDFEstudoPersonalizado() {
     let textoMod = "Todas as Modalidades";
     if(filtroMod === "leve") textoMod = "Apenas Parcela Leve (50%) / Reduzida";
     if(filtroMod === "linear") textoMod = "Apenas Parcela Linear / Cheia (100%)";
+
+    const aplicarRodape = (pagina, totalPaginas) => {
+        doc.setDrawColor(226, 232, 240);
+        doc.line(15, 280, 195, 280);
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
+        doc.text(`Consultor(a): ${consultor}`, 15, 287);
+        if(telConsultor) {
+            doc.text(` | Tel/WhatsApp: ${telConsultor}`, 85, 287);
+        }
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+        doc.text(`Página ${pagina} de ${totalPaginas}`, 195, 287, {align: "right"});
+    };
 
     doc.setFillColor(11, 35, 65);
     doc.rect(0, 0, 210, 4, 'F');
@@ -1134,7 +1228,7 @@ function exportarPDFEstudoPersonalizado() {
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
 
     resultadosFiltradosCache.forEach((item, index) => {
-        if(y > 260) {
+        if(y > 250) {
             doc.addPage();
             y = 20;
         }
@@ -1151,7 +1245,7 @@ function exportarPDFEstudoPersonalizado() {
     });
 
     y += 10;
-    if(y > 250) { doc.addPage(); y = 30; }
+    if(y > 230) { doc.addPage(); y = 30; }
     doc.setFillColor(254, 243, 199); doc.rect(15, y, 180, 22, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(146, 64, 14);
     doc.text("Entenda as modalidades apresentadas:", 20, y + 6);
@@ -1159,12 +1253,13 @@ function exportarPDFEstudoPersonalizado() {
     doc.text("• Parcela Leve (50%): Permite pagar metade do valor linear nas parcelas iniciais até a contemplação do bem.", 20, y + 11);
     doc.text("• Condições de Taxa de Administração já inclusas nos cálculos. Valores de referência oficiais.", 20, y + 16);
 
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
-    doc.text("Ficou com alguma dúvida ou quer garantir a sua cota?", 15, y + 32);
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
-    doc.text(`Entre em contato diretamente com ${consultor} - Consórcio Comauto.`, 15, y + 38);
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        aplicarRodape(i, totalPages);
+    }
 
-    doc.save(`Estudo_Parcelas_Comauto_${vMin}_a_${vMax}.pdf`);
+    doc.save(`estudo comauto - R$${vMin} a R$${vMax}.pdf`);
 }
 
 function exportarPDFPropostaViva() {
@@ -1177,8 +1272,9 @@ function exportarPDFPropostaViva() {
     const ano = dataHoje.getFullYear();
     const dataFormatada = `${dia}/${mes}/${ano}`;
 
-    const cliente = document.getElementById("nomeCliente").value;
-    const consultor = document.getElementById("nomeConsultor").value;
+    const cliente = document.getElementById("nomeCliente").value || "Cliente";
+    const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
+    const telConsultor = document.getElementById("telConsultor").value || "";
     const grupo = document.getElementById("grupo").value;
     const perfil = document.getElementById("perfil").value;
     const credito = parseFloat(document.getElementById("credito").value);
@@ -1247,6 +1343,18 @@ function exportarPDFPropostaViva() {
         
         doc.setDrawColor(241, 245, 249);
         doc.line(15, 42, 195, 42);
+    };
+
+    const aplicarRodape = (pagina, totalPaginas) => {
+        doc.setDrawColor(226, 232, 240);
+        doc.line(15, 280, 195, 280);
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
+        doc.text(`Consultor(a): ${consultor}`, 15, 287);
+        if(telConsultor) {
+            doc.text(` | Tel/WhatsApp: ${telConsultor}`, 85, 287);
+        }
+        doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+        doc.text(`Página ${pagina} de ${totalPaginas}`, 195, 287, {align: "right"});
     };
 
     // --- PÁGINA 1 ---
@@ -1376,7 +1484,13 @@ function exportarPDFPropostaViva() {
         doc.setDrawColor(241, 245, 249); doc.line(15, y3+2, 195, y3+2); y3 += 10;
     });
 
-    doc.save(`Proposta_Comauto_VIP_${cliente}.pdf`);
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        aplicarRodape(i, totalPages);
+    }
+
+    doc.save(`proposta comauto - ${cliente}.pdf`);
 }
 
 // Inicializar Aplicativo
