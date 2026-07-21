@@ -37,7 +37,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Navbar Elegante */
         .navbar { 
             background-color: white; 
             padding: 20px 50px; 
@@ -62,7 +61,6 @@
         .navbar .main-title { font-size: 20px; font-weight: 700; color: var(--comauto-blue); margin: 0; letter-spacing: -0.5px; }
         .navbar .sub-title { font-size: 12px; font-weight: 500; color: var(--text-muted); margin: 4px 0 0 0; }
 
-        /* Abas de Navegação Superior */
         .tabs-header {
             max-width: 1300px;
             margin: 25px auto 0 auto;
@@ -90,7 +88,6 @@
             border-color: var(--comauto-blue);
         }
 
-        /* Container de Conteúdo */
         .tab-content { display: none; }
         .tab-content.active { display: grid; }
 
@@ -169,7 +166,8 @@
         input[readonly] { background-color: var(--bg-main); border-color: var(--card-border); color: var(--text-muted); }
         
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
+        @media(max-width: 900px) { .row-4 { grid-template-columns: 1fr 1fr; } }
 
         .btn-group { display: flex; gap: 15px; margin-top: 30px; }
         button { 
@@ -205,7 +203,6 @@
         
         .chart-container { position: relative; margin-top: 35px; height: 300px; }
 
-        /* Tabela de Resultados de Busca */
         .table-results {
             width: 100%;
             border-collapse: collapse;
@@ -259,7 +256,6 @@
     </div>
 </div>
 
-<!-- NAVEGAÇÃO DE ABAS SUPERIOR -->
 <div class="tabs-header">
     <button class="tab-btn active" onclick="trocarAba('abaSimulador', this)">📊 Simulador Comparativo</button>
     <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca por Faixa de Parcela</button>
@@ -393,7 +389,7 @@
     <div class="container-full">
         <div class="card">
             <h2>Estudo de Parcelas Personalizado</h2>
-            <div class="row-3">
+            <div class="row-4">
                 <div class="form-group">
                     <label for="buscaMin">Parcela Mínima (R$)</label>
                     <input type="number" id="buscaMin" value="300" oninput="filtrarParcelas()">
@@ -401,6 +397,14 @@
                 <div class="form-group">
                     <label for="buscaMax">Parcela Máxima (R$)</label>
                     <input type="number" id="buscaMax" value="400" oninput="filtrarParcelas()">
+                </div>
+                <div class="form-group">
+                    <label for="buscaModalidade">Modalidade da Parcela</label>
+                    <select id="buscaModalidade" onchange="filtrarParcelas()">
+                        <option value="todos">Todas as Modalidades</option>
+                        <option value="leve" selected>Apenas Parcela Leve (50%) / Reduzida</option>
+                        <option value="linear">Apenas Parcela Linear / Cheia (100%)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="buscaPerfil">Perfil do Cliente</label>
@@ -707,10 +711,11 @@ function desenharGrafico(c, f) {
     });
 }
 
-/* FUNÇÃO DE FILTRO DA ABA DE BUSCA */
+/* FILTRO DE BUSCA POR PARCELA E MODALIDADE SELECIONADA */
 function filtrarParcelas() {
     const vMin = parseFloat(document.getElementById("buscaMin").value) || 0;
     const vMax = parseFloat(document.getElementById("buscaMax").value) || 999999;
+    const filtroModalidade = document.getElementById("buscaModalidade").value;
     const perfil = document.getElementById("buscaPerfil").value;
     const tbody = document.getElementById("corpoTabelaBusca");
     
@@ -727,6 +732,10 @@ function filtrarParcelas() {
                 const modalidades = cData[valCred];
                 
                 Object.keys(modalidades).forEach(modKey => {
+                    // Aplica o filtro de modalidade escolhido pelo usuário
+                    if (filtroModalidade === "linear" && modKey !== "linear") return;
+                    if (filtroModalidade === "leve" && (modKey !== "leve" && modKey !== "reduzida")) return;
+
                     const valParc = modalidades[modKey];
                     
                     if (valParc >= vMin && valParc <= vMax) {
@@ -746,7 +755,7 @@ function filtrarParcelas() {
                             <td><strong>Grupo ${gId}</strong> (${perfilNome})</td>
                             <td>${prazo} meses</td>
                             <td>R$ ${parseInt(valCred).toLocaleString('pt-BR')},00</td>
-                            <td><span class="${modKey === 'leve' ? 'badge-leve' : 'badge-linear'}">${modNome}</span></td>
+                            <td><span class="${modKey === 'linear' ? 'badge-linear' : 'badge-leve'}">${modNome}</span></td>
                             <td><strong>${formatarMoeda(valParc)}</strong></td>
                         `;
                         tbody.appendChild(tr);
@@ -757,7 +766,7 @@ function filtrarParcelas() {
     });
 
     if (resultadosFiltradosCache.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhuma opção encontrada nessa faixa de valor. Tente ampliar o intervalo.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhuma opção encontrada nessa faixa de valor ou modalidade. Tente ajustar os filtros.</td></tr>`;
     }
 }
 
@@ -774,6 +783,11 @@ function exportarPDFEstudoPersonalizado() {
     const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
     const vMin = document.getElementById("buscaMin").value;
     const vMax = document.getElementById("buscaMax").value;
+    const filtroMod = document.getElementById("buscaModalidade").value;
+
+    let textoMod = "Todas as Modalidades";
+    if(filtroMod === "leve") textoMod = "Apenas Parcela Leve (50%) / Reduzida";
+    if(filtroMod === "linear") textoMod = "Apenas Parcela Linear / Cheia (100%)";
 
     // Cabeçalho Clean
     doc.setFillColor(11, 35, 65);
@@ -797,7 +811,7 @@ function exportarPDFEstudoPersonalizado() {
     doc.setFont("Helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(11, 35, 65);
     doc.text(`Consultor de Vendas: ${consultor}`, 15, 52);
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
-    doc.text(`Filtro Selecionado: Parcelas entre R$ ${vMin},00 e R$ ${vMax},00 | Emissão: ${dataFormatada}`, 15, 58);
+    doc.text(`Filtro: Parcelas entre R$ ${vMin},00 e R$ ${vMax},00 (${textoMod}) | Emissão: ${dataFormatada}`, 15, 58);
 
     // Tabela no PDF
     let y = 70;
@@ -805,9 +819,9 @@ function exportarPDFEstudoPersonalizado() {
     doc.rect(15, y, 180, 10, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
     doc.text("GRUPO / CATEGORIA", 18, y + 6.5);
-    doc.text("PRAZO", 85, y + 6.5);
-    doc.text("VALOR DO CRÉDITO", 115, y + 6.5);
-    doc.text("PARCELA SELECIONADA", 155, y + 6.5);
+    doc.text("PRAZO", 80, y + 6.5);
+    doc.text("VALOR DO CRÉDITO", 110, y + 6.5);
+    doc.text("PARCELA SELECIONADA", 150, y + 6.5);
 
     y += 12;
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
@@ -818,10 +832,10 @@ function exportarPDFEstudoPersonalizado() {
             y = 20;
         }
         doc.text(item.grupo, 18, y);
-        doc.text(item.prazo, 85, y);
-        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 115, y);
+        doc.text(item.prazo, 80, y);
+        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 110, y);
         doc.setFont("Helvetica", "bold");
-        doc.text(`${formatarMoeda(item.valParcela)}`, 155, y);
+        doc.text(`${formatarMoeda(item.valParcela)}`, 150, y);
         doc.setFont("Helvetica", "normal");
         
         doc.setDrawColor(241, 245, 249);
