@@ -66,10 +66,11 @@
             margin: 25px auto 0 auto;
             padding: 0 30px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         .tab-btn {
-            padding: 14px 28px;
+            padding: 14px 24px;
             background-color: white;
             border: 1px solid var(--card-border);
             border-radius: 12px 12px 0 0;
@@ -166,8 +167,9 @@
         input[readonly] { background-color: var(--bg-main); border-color: var(--card-border); color: var(--text-muted); }
         
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
         .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
-        @media(max-width: 900px) { .row-4 { grid-template-columns: 1fr 1fr; } }
+        @media(max-width: 900px) { .row-4, .row-3 { grid-template-columns: 1fr 1fr; } }
 
         .btn-group { display: flex; gap: 15px; margin-top: 30px; }
         button { 
@@ -203,44 +205,52 @@
         
         .chart-container { position: relative; margin-top: 35px; height: 300px; }
 
-        .table-results {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-        }
-        .table-results th {
-            background-color: var(--bg-main);
-            color: var(--comauto-blue);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 14px;
-            text-align: left;
-            border-bottom: 2px solid var(--card-border);
-        }
-        .table-results td {
-            padding: 14px;
-            border-bottom: 1px solid var(--card-border);
-            font-size: 14px;
-            color: var(--text-main);
-        }
+        .table-results { width: 100%; border-collapse: collapse; margin-top: 25px; }
+        .table-results th { background-color: var(--bg-main); color: var(--comauto-blue); font-size: 12px; font-weight: 700; text-transform: uppercase; padding: 14px; text-align: left; border-bottom: 2px solid var(--card-border); }
+        .table-results td { padding: 14px; border-bottom: 1px solid var(--card-border); font-size: 14px; color: var(--text-main); }
         .table-results tr:hover { background-color: #f8fafc; }
-        .badge-leve {
-            background-color: #fef3c7;
-            color: #92400e;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
+        .badge-leve { background-color: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .badge-linear { background-color: #e0f2fe; color: #075985; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+        /* ESTILOS DA CALCULADORA PRESENCIAL */
+        .calc-wrapper {
+            background-color: var(--bg-main);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--card-border);
         }
-        .badge-linear {
-            background-color: #e0f2fe;
-            color: #075985;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
+        .calc-display {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--comauto-blue);
+            text-align: right;
+            margin-bottom: 15px;
+            min-height: 60px;
+            word-wrap: break-word;
         }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .calc-btn {
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: var(--primary-dark);
+            cursor: pointer;
+        }
+        .calc-btn:hover { background: #e2e8f0; }
+        .calc-btn.op { background: var(--bg-main); color: var(--comauto-blue); font-weight: 800; }
+        .calc-btn.equal { background: var(--comauto-blue); color: white; border-color: var(--comauto-blue); }
+        .calc-btn.clear { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
     </style>
 </head>
 <body>
@@ -259,6 +269,7 @@
 <div class="tabs-header">
     <button class="tab-btn active" onclick="trocarAba('abaSimulador', this)">📊 Simulador Comparativo</button>
     <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca por Faixa de Parcela</button>
+    <button class="tab-btn" onclick="trocarAba('abaPresencial', this)">🤝 Atendimento Presencial</button>
 </div>
 
 <!-- ABA 1: SIMULADOR COMPARATIVO -->
@@ -437,6 +448,104 @@
     </div>
 </div>
 
+<!-- ABA 3: ATENDIMENTO PRESENCIAL E SIMULAÇÃO DE LANCE RÁPIDO -->
+<div id="abaPresencial" class="tab-content">
+    <div class="container">
+        <div class="card">
+            <h2>Simulação Dinâmica de Lance (Presencial)</h2>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label for="pGrupo">Selecione o Grupo</label>
+                    <select id="pGrupo" onchange="pAtualizarCampos()">
+                        <option value="51">Grupo 51 (162 Meses) - Imóveis</option>
+                        <option value="1641">Grupo 1641 (44 Meses) - Auto</option>
+                        <option value="1642">Grupo 1642 (50 Meses) - Auto</option>
+                        <option value="1643">Grupo 1643 (46 Meses) - Moto</option>
+                        <option value="1644">Grupo 1644 (58 Meses) - Auto</option>
+                        <option value="1645">Grupo 1645 (66 Meses) - Auto</option>
+                        <option value="1646">Grupo 1646 (58 Meses) - Moto/Auto</option>
+                        <option value="1647">Grupo 1647 (94 Meses) - Auto</option>
+                        <option value="1648" selected>Grupo 1648 (68 Meses) - Auto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pPerfil">Perfil</label>
+                    <select id="pPerfil" onchange="pAtualizarCampos()">
+                        <option value="PF" selected>Pessoa Física</option>
+                        <option value="PJ">Pessoa Jurídica</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="pCredito">Valor do Crédito (R$)</label>
+                    <select id="pCredito" onchange="pCalcular()"></select>
+                </div>
+                <div class="form-group">
+                    <label for="pModalidade">Modalidade de Entrada</label>
+                    <select id="pModalidade" onchange="pCalcular()">
+                        <option value="linear">Linear (100%)</option>
+                        <option value="leve" selected>Leve (50%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+            <h2>Ajuste Rápido de Lance Ofertado</h2>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="pValorLance">Lance em Reais (R$)</label>
+                    <input type="number" id="pValorLance" value="10000" oninput="pCalcular()">
+                </div>
+                <div class="form-group">
+                    <label for="pMesContemplacao">Mês Pretendido da Contemplação</label>
+                    <input type="number" id="pMesContemplacao" value="1" min="1" oninput="pCalcular()">
+                </div>
+            </div>
+
+            <div class="result-box highlight" style="margin-top:20px;">
+                <div class="res-label" style="color: var(--success-green);">Parcela Atualizada Pós-Lance</div>
+                <div class="res-val" id="pResNovaParcela" style="color: var(--success-green);">R$ 0,00 /mês</div>
+                <div class="res-desc" id="pResDescricao"></div>
+            </div>
+        </div>
+
+        <!-- CALCULADORA EMBUTIDA PARA ATENDIMENTO -->
+        <div class="card">
+            <h2>Calculadora Comercial Rápida</h2>
+            <div class="calc-wrapper">
+                <div class="calc-display" id="calcDisplay">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn clear" onclick="calcClear()">C</button>
+                    <button class="calc-btn op" onclick="calcOp('/')">/</button>
+                    <button class="calc-btn op" onclick="calcOp('*')">*</button>
+                    <button class="calc-btn op" onclick="calcOp('-')">-</button>
+                    
+                    <button class="calc-btn" onclick="calcNum('7')">7</button>
+                    <button class="calc-btn" onclick="calcNum('8')">8</button>
+                    <button class="calc-btn" onclick="calcNum('9')">9</button>
+                    <button class="calc-btn op" onclick="calcOp('+')">+</button>
+                    
+                    <button class="calc-btn" onclick="calcNum('4')">4</button>
+                    <button class="calc-btn" onclick="calcNum('5')">5</button>
+                    <button class="calc-btn" onclick="calcNum('6')">6</button>
+                    <button class="calc-btn equal" style="grid-row: span 2;" onclick="calcEqual()">=</button>
+                    
+                    <button class="calc-btn" onclick="calcNum('1')">1</button>
+                    <button class="calc-btn" onclick="calcNum('2')">2</button>
+                    <button class="calc-btn" onclick="calcNum('3')">3</button>
+                    
+                    <button class="calc-btn" style="grid-column: span 2;" onclick="calcNum('0')">0</button>
+                    <button class="calc-btn" onclick="calcNum('.')">.</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // BANCO DE DADOS ATUALIZADO CONFORME TABELAS OFICIAIS DE 20/07/2026
 const bancoDadosComauto = {
@@ -525,6 +634,8 @@ function trocarAba(idAba, btn) {
     
     if(idAba === 'abaBusca') {
         filtrarParcelas();
+    } else if(idAba === 'abaPresencial') {
+        pAtualizarCampos();
     }
 }
 
@@ -732,7 +843,6 @@ function filtrarParcelas() {
                 const modalidades = cData[valCred];
                 
                 Object.keys(modalidades).forEach(modKey => {
-                    // Aplica o filtro de modalidade escolhido pelo usuário
                     if (filtroModalidade === "linear" && modKey !== "linear") return;
                     if (filtroModalidade === "leve" && (modKey !== "leve" && modKey !== "reduzida")) return;
 
@@ -770,6 +880,90 @@ function filtrarParcelas() {
     }
 }
 
+/* LÓGICA DO ATENDIMENTO PRESENCIAL (ABA 3) */
+function pAtualizarCampos() {
+    const grupo = document.getElementById("pGrupo").value;
+    const perfil = document.getElementById("pPerfil").value;
+    const selectCredito = document.getElementById("pCredito");
+    const plano = bancoDadosComauto[grupo];
+    
+    selectCredito.innerHTML = "";
+    if (plano && plano[perfil]) {
+        Object.keys(plano[perfil]).forEach(credito => {
+            let opt = document.createElement("option");
+            opt.value = credito;
+            opt.textContent = `R$ ${parseInt(credito).toLocaleString('pt-BR')},00`;
+            selectCredito.appendChild(opt);
+        });
+    }
+    pCalcular();
+}
+
+function pCalcular() {
+    const grupo = document.getElementById("pGrupo").value;
+    const perfil = document.getElementById("pPerfil").value;
+    const credito = parseFloat(document.getElementById("pCredito").value) || 0;
+    const modalidade = document.getElementById("pModalidade").value;
+    const lance = parseFloat(document.getElementById("pValorLance").value) || 0;
+    const mes = parseInt(document.getElementById("pMesContemplacao").value) || 1;
+
+    if(!credito) return;
+
+    const plano = bancoDadosComauto[grupo];
+    const prazo = plano.prazo;
+    
+    const parcelaC = plano[perfil][credito][modalidade] || plano[perfil][credito]["linear"];
+    const parcelaLinear = plano[perfil][credito]["linear"];
+    
+    const totalContrato = parcelaLinear * prazo;
+    const mesesRestantes = prazo - mes;
+    
+    let saldoLiquido = 0;
+    if (modalidade === "linear") {
+        saldoLiquido = totalContrato - (parcelaLinear * mes) - lance;
+    } else {
+        const diferenca = (parcelaLinear - parcelaC) * mes;
+        const saldoFuturo = parcelaLinear * mesesRestantes;
+        saldoLiquido = (saldoFuturo + diferenca) - lance;
+    }
+
+    const novaParcela = saldoLiquido / mesesRestantes;
+    const pctLance = (lance / credito) * 100;
+
+    document.getElementById("pResNovaParcela").textContent = `${formatarMoeda(novaParcela)} /mês`;
+    document.getElementById("pResDescricao").innerHTML = `
+        Crédito Original: <strong>${formatarMoeda(credito)}</strong> | Parcela Inicial: <strong>${formatarMoeda(parcelaC)}</strong><br>
+        Lance Ofertado: <strong>${formatarMoeda(lance)}</strong> (${pctLance.toFixed(2)}% do Crédito)<br>
+        Prazo Restante pós-mês ${mes}: <strong>${mesesRestantes} parcelas de ${formatarMoeda(novaParcela)}</strong>.
+    `;
+}
+
+/* LÓGICA DA CALCULADORA COMERCIAL */
+let calcExpr = "";
+function calcNum(num) {
+    if(calcExpr === "0") calcExpr = "";
+    calcExpr += num;
+    document.getElementById("calcDisplay").textContent = calcExpr;
+}
+function calcOp(op) {
+    calcExpr += " " + op + " ";
+    document.getElementById("calcDisplay").textContent = calcExpr;
+}
+function calcClear() {
+    calcExpr = "";
+    document.getElementById("calcDisplay").textContent = "0";
+}
+function calcEqual() {
+    try {
+        let res = eval(calcExpr);
+        document.getElementById("calcDisplay").textContent = Number(res.toFixed(2)).toLocaleString('pt-BR');
+        calcExpr = res.toString();
+    } catch (e) {
+        document.getElementById("calcDisplay").textContent = "Erro";
+        calcExpr = "";
+    }
+}
+
 function exportarPDFEstudoPersonalizado() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -789,7 +983,6 @@ function exportarPDFEstudoPersonalizado() {
     if(filtroMod === "leve") textoMod = "Apenas Parcela Leve (50%) / Reduzida";
     if(filtroMod === "linear") textoMod = "Apenas Parcela Linear / Cheia (100%)";
 
-    // Cabeçalho Clean
     doc.setFillColor(11, 35, 65);
     doc.rect(0, 0, 210, 4, 'F');
     
@@ -813,7 +1006,6 @@ function exportarPDFEstudoPersonalizado() {
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
     doc.text(`Filtro: Parcelas entre R$ ${vMin},00 e R$ ${vMax},00 (${textoMod}) | Emissão: ${dataFormatada}`, 15, 58);
 
-    // Tabela no PDF
     let y = 70;
     doc.setFillColor(248, 250, 252);
     doc.rect(15, y, 180, 10, 'F');
@@ -843,7 +1035,6 @@ function exportarPDFEstudoPersonalizado() {
         y += 9;
     });
 
-    // Rodapé Explicativo do Estudo
     y += 10;
     if(y > 250) { doc.addPage(); y = 30; }
     doc.setFillColor(254, 243, 199); doc.rect(15, y, 180, 22, 'F');
