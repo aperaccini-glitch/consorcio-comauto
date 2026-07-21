@@ -262,16 +262,16 @@
             <div class="row">
                 <div class="form-group">
                     <label for="nomeCliente">Nome do Cliente</label>
-                    <input type="text" id="nomeCliente" value="Bruno">
+                    <input type="text" id="nomeCliente" value="Bruno" oninput="sincronizarCamposGerais('nomeCliente', this.value)">
                 </div>
                 <div class="form-group">
                     <label for="nomeConsultor">Nome do Consultor(a)</label>
-                    <input type="text" id="nomeConsultor" value="Amanda Peraccini">
+                    <input type="text" id="nomeConsultor" value="Amanda Peraccini" oninput="sincronizarCamposGerais('nomeConsultor', this.value)">
                 </div>
             </div>
             <div class="form-group">
                 <label for="telConsultor">Telefone / WhatsApp do Consultor(a)</label>
-                <input type="text" id="telConsultor" value="(00) 00000-0000" placeholder="(14) 99999-9999">
+                <input type="text" id="telConsultor" value="(00) 00000-0000" placeholder="(14) 99999-9999" oninput="sincronizarCamposGerais('telConsultor', this.value)">
             </div>
 
             <h2 class="section-divider">Configuração do Consórcio</h2>
@@ -697,14 +697,30 @@
     </div>
 </div>
 
-<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (COM PDF DINÂMICO E MARCA D'ÁGUA TEMÁTICA) -->
+<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (COM CAMPOS EXCLUSIVOS E MARCA D'ÁGUA NO RODAPÉ) -->
 <div id="abaServicos" class="tab-content">
     <div class="container">
         <div class="card">
-            <h2>Simulação de Consórcio de Serviços (58 Meses)</h2>
+            <h2>Identificação Comercial</h2>
+            <div class="row">
+                <div class="form-group">
+                    <label for="sNomeCliente">Nome do Cliente</label>
+                    <input type="text" id="sNomeCliente" value="Bruno" oninput="sincronizarCamposGerais('sNomeCliente', this.value)">
+                </div>
+                <div class="form-group">
+                    <label for="sNomeConsultor">Nome do Consultor(a)</label>
+                    <input type="text" id="sNomeConsultor" value="Amanda Peraccini" oninput="sincronizarCamposGerais('sNomeConsultor', this.value)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sTelConsultor">Telefone / WhatsApp do Consultor(a)</label>
+                <input type="text" id="sTelConsultor" value="(00) 00000-0000" placeholder="(14) 99999-9999" oninput="sincronizarCamposGerais('sTelConsultor', this.value)">
+            </div>
+
+            <h2 class="section-divider">Simulação de Consórcio de Serviços (58 Meses)</h2>
             
             <div class="form-group">
-                <label for="sTipoServico">Tipo / Objetivo do Serviço (Muda o Estilo do PDF)</label>
+                <label for="sTipoServico">Tipo / Objetivo do Serviço (Muda o Visual do PDF)</label>
                 <select id="sTipoServico">
                     <option value="Cirurgia Plástica / Procedimento Estético" selected>Cirurgia Plástica / Procedimento Estético</option>
                     <option value="Viagens, Passagens & Intercâmbio">Viagens, Passagens & Intercâmbio</option>
@@ -900,6 +916,21 @@ let chartInstance = null;
 let base64Logo = null;
 let resultadosFiltradosCache = [];
 let fipeValorNumCache = 0;
+
+function sincronizarCamposGerais(origem, valor) {
+    if (origem === 'nomeCliente' || origem === 'sNomeCliente') {
+        document.getElementById('nomeCliente').value = valor;
+        document.getElementById('sNomeCliente').value = valor;
+    }
+    if (origem === 'nomeConsultor' || origem === 'sNomeConsultor') {
+        document.getElementById('nomeConsultor').value = valor;
+        document.getElementById('sNomeConsultor').value = valor;
+    }
+    if (origem === 'telConsultor' || origem === 'sTelConsultor') {
+        document.getElementById('telConsultor').value = valor;
+        document.getElementById('sTelConsultor').value = valor;
+    }
+}
 
 function trocarAba(idAba, btn) {
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
@@ -1431,11 +1462,11 @@ function fipeUsarComoLance() {
         document.getElementById("pValorLance").value = fipeValorNumCache;
         calcularTudo();
         pAtualizarLanceReais();
-        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} aplicado com sucesso como lance nas simulações!`);
+        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} applied com sucesso como lance nas simulações!`);
     }
 }
 
-/* LÓGICA E PDF DA ABA DE SERVIÇOS */
+/* ABA DE SERVIÇOS E IMPRESSÃO COM MARCA D'ÁGUA NO RODAPÉ */
 function carregarOpcoesServico() {
     const sel = document.getElementById("sCredito");
     sel.innerHTML = "";
@@ -1464,9 +1495,9 @@ function exportarPDFServicos() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const cliente = document.getElementById("nomeCliente").value || "Cliente";
-    const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
-    const telConsultor = document.getElementById("telConsultor").value || "";
+    const cliente = document.getElementById("sNomeCliente").value || "Cliente";
+    const consultor = document.getElementById("sNomeConsultor").value || "Amanda Peraccini";
+    const telConsultor = document.getElementById("sTelConsultor").value || "";
     const tipoServico = document.getElementById("sTipoServico").value;
     
     const idx = document.getElementById("sCredito").value || 0;
@@ -1475,38 +1506,38 @@ function exportarPDFServicos() {
     const dataHoje = new Date();
     const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
 
-    // --- DESENHAR VETORES E MARCA D'ÁGUA DINÂMICA SEGUNTO O TIPO DE SERVIÇO ---
-    const desenharMarcaAguaClean = () => {
-        doc.setLineWidth(0.8);
-        doc.setDrawColor(226, 232, 240); // Linhas ultra suaves
+    // --- MARCA D'ÁGUA SUAVE NO CANTO INFERIOR DIREITO (RODAPÉ) ---
+    const desenharIconeRodapeClean = () => {
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(203, 213, 225); // Cor cinza suave / slate light
 
         if (tipoServico.includes("Viagens")) {
-            // Desenhar Avião de Fundo (Marca d'água vetorial estérica)
-            doc.line(80, 160, 140, 160);
-            doc.line(110, 130, 140, 160);
-            doc.line(110, 190, 140, 160);
-            doc.line(80, 160, 65, 145);
-            doc.line(80, 160, 65, 175);
+            // Desenho do Avião sutil no rodapé direito
+            doc.line(160, 255, 188, 255);
+            doc.line(174, 240, 188, 255);
+            doc.line(174, 270, 188, 255);
+            doc.line(160, 255, 152, 248);
+            doc.line(160, 255, 152, 262);
         } else if (tipoServico.includes("Reforma") || tipoServico.includes("Construção")) {
-            // Desenhar Estrutura / Casa Vetorial
-            doc.line(70, 180, 110, 130);
-            doc.line(110, 130, 150, 180);
-            doc.line(80, 180, 80, 210);
-            doc.line(140, 180, 140, 210);
-            doc.line(80, 210, 140, 210);
-        } else if (tipoServico.includes("Cirurgia") || tipoServico.includes("Estético")) {
-            // Desenhar Símbolo de Saúde / Bem-estar
-            doc.line(110, 140, 110, 200);
-            doc.line(80, 170, 140, 170);
-            doc.circle(110, 170, 45, 'S');
+            // Desenho de Casa/Edificação sutil no rodapé direito
+            doc.line(155, 265, 175, 245);
+            doc.line(175, 245, 195, 265);
+            doc.line(160, 265, 160, 275);
+            doc.line(190, 265, 190, 275);
+            doc.line(160, 275, 190, 275);
+        } else if (tipoServico.includes("Cirurgia") || tipoServico.includes("Estético") || tipoServico.includes("Médicos")) {
+            // Símbolo de Saúde / Cuidado sutil no rodapé direito
+            doc.circle(175, 258, 14, 'S');
+            doc.line(175, 248, 175, 268);
+            doc.line(165, 258, 185, 258);
         } else {
-            // Estrela / Celebração (Festas / Cursos / Gerais)
-            doc.circle(110, 160, 50, 'S');
-            doc.circle(110, 160, 35, 'S');
+            // Celebração / Estrela / Gerais
+            doc.circle(175, 258, 15, 'S');
+            doc.circle(175, 258, 10, 'S');
         }
     };
 
-    desenharMarcaAguaClean();
+    desenharIconeRodapeClean();
 
     // CABEÇALHO CLEAN
     doc.setFillColor(11, 35, 65);
@@ -1519,7 +1550,7 @@ function exportarPDFServicos() {
         doc.text("COMAUTO CONSÓRCIO", 15, 25);
     }
 
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(11, 35, 65);
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(11, 35, 65);
     doc.text("PROPOSTA - CONSÓRCIO DE SERVIÇOS", 110, 23, {align: "left"});
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
     doc.text(`Planejamento Especializado | Tabela Vigente 2026`, 110, 30, {align: "left"});
@@ -1577,7 +1608,7 @@ function exportarPDFServicos() {
         y += 11;
     });
 
-    // RODAPÉ
+    // RODAPÉ COM IDENTIFICAÇÃO E CONTATO
     doc.setDrawColor(226, 232, 240);
     doc.line(15, 280, 195, 280);
     doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
