@@ -250,6 +250,8 @@
     <button class="tab-btn" onclick="trocarAba('abaBusca', this)">🔍 Busca por Faixa de Parcela</button>
     <button class="tab-btn" onclick="trocarAba('abaPresencial', this)">🤝 Atendimento Presencial</button>
     <button class="tab-btn" onclick="trocarAba('abaVeiculos', this)">🚗 O que Comprar (Modelos Fipe)</button>
+    <button class="tab-btn" onclick="trocarAba('abaFipeCliente', this)">📋 Consultar FIPE do Cliente</button>
+    <button class="tab-btn" onclick="trocarAba('abaServicos', this)">🛠️ Consórcio de Serviços</button>
 </div>
 
 <!-- ABA 1: SIMULADOR COMPARATIVO -->
@@ -568,7 +570,7 @@
     </div>
 </div>
 
-<!-- ABA 4: MODELOS DE VEÍCULOS COM INTERVALO DE ANOS (LIMITE 12 ANOS / 2014+) -->
+<!-- ABA 4: MODELOS DE VEÍCULOS -->
 <div id="abaVeiculos" class="tab-content">
     <div class="container-full">
         <div class="card">
@@ -635,6 +637,141 @@
     </div>
 </div>
 
+<!-- ABA 5: CONSULTAR TABELA FIPE DO CLIENTE -->
+<div id="abaFipeCliente" class="tab-content">
+    <div class="container">
+        <div class="card">
+            <h2>Consulta de Tabela FIPE (Seminovo do Cliente)</h2>
+            <div class="form-group">
+                <label for="fipeTipo">Tipo de Veículo</label>
+                <select id="fipeTipo" onchange="fipeCarregarMarcas()">
+                    <option value="carros" selected>Carros e Utilitários</option>
+                    <option value="motos">Motos</option>
+                    <option value="caminhoes">Caminhões</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="fipeMarca">1. Marca do Veículo</label>
+                    <select id="fipeMarca" onchange="fipeCarregarModelos()">
+                        <option value="">Selecione o Tipo primeiro...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fipeModelo">2. Modelo do Veículo</label>
+                    <select id="fipeModelo" onchange="fipeCarregarAnos()" disabled>
+                        <option value="">Selecione a Marca...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="fipeAno">3. Ano Modelo / Combustível</label>
+                <select id="fipeAno" onchange="fipeConsultarValor()" disabled>
+                    <option value="">Selecione o Modelo...</option>
+                </select>
+            </div>
+
+            <div id="fipeBoxResultado" class="result-box highlight" style="display:none; margin-top:20px;">
+                <div class="res-label" style="color: var(--success-green);">Valor Oficial Tabela FIPE</div>
+                <div class="res-val" id="fipeValorRes" style="color: var(--success-green);">R$ 0,00</div>
+                <div class="res-desc" id="fipeDescRes"></div>
+                <button class="btn-pdf" style="margin-top:15px; width:100%;" onclick="fipeUsarComoLance()">
+                    🚀 Usar este Valor como Lance Ofertado
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Dicas Comerciais de Avaliação</h2>
+            <div class="result-box" style="background:#fff;">
+                <div class="res-label">Como utilizar a FIPE na negociação:</div>
+                <div class="res-desc" style="margin-top:10px;">
+                    • <strong>Lance Embutido / Troca:</strong> O valor FIPE serve como excelente parâmetro objetivo para o cliente entender o poder do seminovo como entrada ou lance.<br><br>
+                    • <strong>Margem Prática de Mercado:</strong> Lembre ao cliente que o valor FIPE é uma média nacional e avaliações físicas podem considerar estado de conservação, quilometragem e demanda regional.<br><br>
+                    • <strong>Limite de Anos Comauto:</strong> Lembre de conferir se o seminovo possui até 12 anos de uso para aceitação no grupo.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ABA 6: CONSÓRCIO DE SERVIÇOS (COM PDF DINÂMICO E MARCA D'ÁGUA TEMÁTICA) -->
+<div id="abaServicos" class="tab-content">
+    <div class="container">
+        <div class="card">
+            <h2>Simulação de Consórcio de Serviços (58 Meses)</h2>
+            
+            <div class="form-group">
+                <label for="sTipoServico">Tipo / Objetivo do Serviço (Muda o Estilo do PDF)</label>
+                <select id="sTipoServico">
+                    <option value="Cirurgia Plástica / Procedimento Estético" selected>Cirurgia Plástica / Procedimento Estético</option>
+                    <option value="Viagens, Passagens & Intercâmbio">Viagens, Passagens & Intercâmbio</option>
+                    <option value="Reforma & Construção Residencial">Reforma & Construção Residencial</option>
+                    <option value="Festas, Casamentos & Formaturas">Festas, Casamentos & Formaturas</option>
+                    <option value="Estudos, Cursos & Pós-Graduação">Estudos, Cursos & Pós-Graduação</option>
+                    <option value="Serviços Médicos / Odontológicos">Serviços Médicos / Odontológicos</option>
+                    <option value="Serviços Gerais & Outros">Serviços Gerais & Outros</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="sCredito">Valor do Crédito Selecionado</label>
+                    <select id="sCredito" onchange="servicoCalcular()"></select>
+                </div>
+                <div class="form-group">
+                    <label for="sPrazo">Prazo do Grupo</label>
+                    <input type="text" id="sPrazo" value="58 Meses" readonly>
+                </div>
+            </div>
+
+            <div class="result-box highlight" style="margin-top:15px;">
+                <div class="res-label" style="color: var(--comauto-blue);">Parcela Mensal Fixa de Tabela</div>
+                <div class="res-val" id="sResParcela" style="color: var(--comauto-blue);">R$ 0,00 /mês</div>
+                <div class="res-desc" id="sResDescricao">Taxa de administração: 19% total diluída | Sem Fundo de Reserva</div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-pdf" onclick="exportarPDFServicos()">📄 Gerar Proposta Personalizada PDF (Visual Clean)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Condições Oficiais do Grupo de Serviços</h2>
+            <table class="table-results">
+                <tbody>
+                    <tr>
+                        <td><strong>Prazo Total</strong></td>
+                        <td>58 Meses</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Taxa de Administração</strong></td>
+                        <td>19,00% Total (0,60% Parc 1 a 6 | 0,2962% Demais)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fundo de Reserva</strong></td>
+                        <td>0,00% (Isento)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Seguro de Vida</strong></td>
+                        <td>0,084% a.m.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Índice de Correção</strong></td>
+                        <td>Anual, pelo IPCA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Garantia Exigida</strong></td>
+                        <td>Avalista com renda (3x parcela) ou Imóvel / Veículo</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
 // BANCO DE DADOS ATUALIZADO CONFORME TABELAS OFICIAIS DE 20/07/2026
 const bancoDadosComauto = {
@@ -697,7 +834,7 @@ const bancoDadosComauto = {
     "1646": {
         prazo: 58,
         PF: { "15708": { linear: 326.62 }, "17279": { linear: 359.28 }, "18850": { linear: 391.95 }, "20420": { linear: 424.60 }, "21991": { linear: 457.26 }, "23562": { linear: 489.93 }, "25133": { linear: 522.59 }, "26704": { linear: 555.26 }, "28274": { linear: 587.91 }, "29845": { linear: 620.57 }, "31416": { linear: 653.24 } },
-        PJ: { "15708": { linear: 311.44 }, "17279": { linear: 342.59 }, "18850": { linear: 373.74 }, "20420": { linear: 404.87 }, "21991": { linear: 436.02 }, "23562": { linear: 467.17 }, "25133": { linear: 498.32 }, "26704": { linear: 529.46 }, "28274": { linear: 560.59 }, "29845": { linear: 591.74 }, "31416": { linear: 622.89 } }
+        PJ: { "15708": { linear: 311.44 }, "17279": { linear: 342.59 }, "18850": { linear: 373.74 }, "20420": { linear: 404.87 }, "21991": { linear: 436.02 }, "23562": { linear: 489.93 }, "25133": { linear: 498.32 }, "26704": { linear: 529.46 }, "28274": { linear: 560.59 }, "29845": { linear: 591.74 }, "31416": { linear: 622.89 } }
     },
     "1647": {
         prazo: 94,
@@ -710,6 +847,20 @@ const bancoDadosComauto = {
         PJ: { "30000": { linear: 507.36, leve: 262.50 }, "35000": { linear: 591.92, leve: 306.25 }, "40000": { linear: 676.48, leve: 350.00 }, "45000": { linear: 761.04, leve: 393.75 }, "50000": { linear: 845.60, leve: 437.50 }, "55000": { linear: 930.15, leve: 481.25 }, "60000": { linear: 1014.71, leve: 525.00 } }
     }
 };
+
+// TABELA OFICIAL DE SERVIÇOS (58 PARCELAS)
+const tabelaServicos = [
+    { codigo: "3004", desc: "SE - 04", credito: 14856.00, parcela: 319.65 },
+    { codigo: "3002", desc: "SE - 02", credito: 16977.00, parcela: 365.29 },
+    { codigo: "3005", desc: "SE - 05", credito: 19096.00, parcela: 410.89 },
+    { codigo: "3003", desc: "SE - 03", credito: 21219.00, parcela: 456.57 },
+    { codigo: "3118", desc: "SE - 05", credito: 26359.00, parcela: 567.16 },
+    { codigo: "3106", desc: "SE - 06", credito: 30862.00, parcela: 664.05 },
+    { codigo: "3107", desc: "SE - 07", credito: 33949.00, parcela: 730.48 },
+    { codigo: "3017", desc: "SE - 17", credito: 20000.00, parcela: 430.34 },
+    { codigo: "3018", desc: "SE - 18", credito: 25000.00, parcela: 537.92 },
+    { codigo: "3019", desc: "SE - 19", credito: 30000.00, parcela: 645.51 }
+];
 
 const catalogoVeiculos = [
     { nome: "Fiat Palio 1.0 Fire Flex", ano: 2014, preco: 28500, categoria: "Hatch" },
@@ -748,6 +899,7 @@ const catalogoVeiculos = [
 let chartInstance = null;
 let base64Logo = null;
 let resultadosFiltradosCache = [];
+let fipeValorNumCache = 0;
 
 function trocarAba(idAba, btn) {
     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
@@ -761,6 +913,10 @@ function trocarAba(idAba, btn) {
         pAtualizarCampos();
     } else if(idAba === 'abaVeiculos') {
         buscarVeiculos();
+    } else if(idAba === 'abaFipeCliente') {
+        fipeCarregarMarcas();
+    } else if(idAba === 'abaServicos') {
+        carregarOpcoesServico();
     }
 }
 
@@ -1158,6 +1314,281 @@ function buscarVeiculos() {
         `;
         container.appendChild(div);
     });
+}
+
+/* CONSULTA DE TABELA FIPE */
+async function fipeCarregarMarcas() {
+    const tipo = document.getElementById("fipeTipo").value;
+    const selMarca = document.getElementById("fipeMarca");
+    const selModelo = document.getElementById("fipeModelo");
+    const selAno = document.getElementById("fipeAno");
+    
+    selMarca.innerHTML = "<option value=''>Carregando marcas...</option>";
+    selModelo.innerHTML = "<option value=''>Selecione a Marca...</option>"; selModelo.disabled = true;
+    selAno.innerHTML = "<option value=''>Selecione o Modelo...</option>"; selAno.disabled = true;
+    document.getElementById("fipeBoxResultado").style.display = "none";
+
+    try {
+        const resp = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
+        const marcas = await resp.json();
+        selMarca.innerHTML = "<option value=''>Selecione a Marca...</option>";
+        marcas.forEach(m => {
+            let opt = document.createElement("option");
+            opt.value = m.codigo;
+            opt.textContent = m.nome;
+            selMarca.appendChild(opt);
+        });
+    } catch(e) {
+        selMarca.innerHTML = "<option value=''>Erro ao carregar marcas</option>";
+    }
+}
+
+async function fipeCarregarModelos() {
+    const tipo = document.getElementById("fipeTipo").value;
+    const marca = document.getElementById("fipeMarca").value;
+    const selModelo = document.getElementById("fipeModelo");
+    const selAno = document.getElementById("fipeAno");
+
+    if(!marca) return;
+    
+    selModelo.innerHTML = "<option value=''>Carregando modelos...</option>"; selModelo.disabled = true;
+    selAno.innerHTML = "<option value=''>Selecione o Modelo...</option>"; selAno.disabled = true;
+    document.getElementById("fipeBoxResultado").style.display = "none";
+
+    try {
+        const resp = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas/${marca}/modelos`);
+        const data = await resp.json();
+        selModelo.innerHTML = "<option value=''>Selecione o Modelo...</option>";
+        selModelo.disabled = false;
+        data.modelos.forEach(m => {
+            let opt = document.createElement("option");
+            opt.value = m.codigo;
+            opt.textContent = m.nome;
+            selModelo.appendChild(opt);
+        });
+    } catch(e) {
+        selModelo.innerHTML = "<option value=''>Erro ao carregar modelos</option>";
+    }
+}
+
+async function fipeCarregarAnos() {
+    const tipo = document.getElementById("fipeTipo").value;
+    const marca = document.getElementById("fipeMarca").value;
+    const modelo = document.getElementById("fipeModelo").value;
+    const selAno = document.getElementById("fipeAno");
+
+    if(!modelo) return;
+
+    selAno.innerHTML = "<option value=''>Carregando anos...</option>"; selAno.disabled = true;
+    document.getElementById("fipeBoxResultado").style.display = "none";
+
+    try {
+        const resp = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas/${marca}/modelos/${modelo}/anos`);
+        const anos = await resp.json();
+        selAno.innerHTML = "<option value=''>Selecione o Ano Modelo...</option>";
+        selAno.disabled = false;
+        anos.forEach(a => {
+            let opt = document.createElement("option");
+            opt.value = a.codigo;
+            opt.textContent = a.nome;
+            selAno.appendChild(opt);
+        });
+    } catch(e) {
+        selAno.innerHTML = "<option value=''>Erro ao carregar anos</option>";
+    }
+}
+
+async function fipeConsultarValor() {
+    const tipo = document.getElementById("fipeTipo").value;
+    const marca = document.getElementById("fipeMarca").value;
+    const modelo = document.getElementById("fipeModelo").value;
+    const ano = document.getElementById("fipeAno").value;
+
+    if(!ano) return;
+
+    try {
+        const resp = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas/${marca}/modelos/${modelo}/anos/${ano}`);
+        const data = await resp.json();
+        
+        const valorTexto = data.Valor; 
+        fipeValorNumCache = parseFloat(valorTexto.replace("R$", "").replace(".", "").replace(",", ".").trim()) || 0;
+
+        document.getElementById("fipeValorRes").textContent = valorTexto;
+        document.getElementById("fipeDescRes").innerHTML = `
+            Veículo: <strong>${data.Marca} ${data.Modelo}</strong><br>
+            Ano Modelo: <strong>${data.AnoModelo} (${data.Combustivel})</strong> | Código FIPE: <strong>${data.CodigoFipe}</strong><br>
+            Referência Tabela: <strong>${data.MesReferencia}</strong>
+        `;
+        document.getElementById("fipeBoxResultado").style.display = "block";
+    } catch(e) {
+        alert("Erro ao obter valor FIPE.");
+    }
+}
+
+function fipeUsarComoLance() {
+    if(fipeValorNumCache > 0) {
+        document.getElementById("valorLance").value = fipeValorNumCache;
+        document.getElementById("pValorLance").value = fipeValorNumCache;
+        calcularTudo();
+        pAtualizarLanceReais();
+        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} aplicado com sucesso como lance nas simulações!`);
+    }
+}
+
+/* LÓGICA E PDF DA ABA DE SERVIÇOS */
+function carregarOpcoesServico() {
+    const sel = document.getElementById("sCredito");
+    sel.innerHTML = "";
+    tabelaServicos.forEach((item, index) => {
+        let opt = document.createElement("option");
+        opt.value = index;
+        opt.textContent = `Crédito: R$ ${item.credito.toLocaleString('pt-BR')},00 (Parc. 58x R$ ${item.parcela.toFixed(2)})`;
+        sel.appendChild(opt);
+    });
+    servicoCalcular();
+}
+
+function servicoCalcular() {
+    const idx = document.getElementById("sCredito").value || 0;
+    const item = tabelaServicos[idx];
+    if(item) {
+        document.getElementById("sResParcela").textContent = `${formatarMoeda(item.parcela)} /mês`;
+        document.getElementById("sResDescricao").innerHTML = `
+            Crédito: <strong>${formatarMoeda(item.credito)}</strong> | Prazo: <strong>58 Meses</strong> | Código Tabela: <strong>${item.codigo}</strong><br>
+            Total do Plano: ${formatarMoeda(item.parcela * 58)}
+        `;
+    }
+}
+
+function exportarPDFServicos() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const cliente = document.getElementById("nomeCliente").value || "Cliente";
+    const consultor = document.getElementById("nomeConsultor").value || "Amanda Peraccini";
+    const telConsultor = document.getElementById("telConsultor").value || "";
+    const tipoServico = document.getElementById("sTipoServico").value;
+    
+    const idx = document.getElementById("sCredito").value || 0;
+    const item = tabelaServicos[idx];
+
+    const dataHoje = new Date();
+    const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
+
+    // --- DESENHAR VETORES E MARCA D'ÁGUA DINÂMICA SEGUNTO O TIPO DE SERVIÇO ---
+    const desenharMarcaAguaClean = () => {
+        doc.setLineWidth(0.8);
+        doc.setDrawColor(226, 232, 240); // Linhas ultra suaves
+
+        if (tipoServico.includes("Viagens")) {
+            // Desenhar Avião de Fundo (Marca d'água vetorial estérica)
+            doc.line(80, 160, 140, 160);
+            doc.line(110, 130, 140, 160);
+            doc.line(110, 190, 140, 160);
+            doc.line(80, 160, 65, 145);
+            doc.line(80, 160, 65, 175);
+        } else if (tipoServico.includes("Reforma") || tipoServico.includes("Construção")) {
+            // Desenhar Estrutura / Casa Vetorial
+            doc.line(70, 180, 110, 130);
+            doc.line(110, 130, 150, 180);
+            doc.line(80, 180, 80, 210);
+            doc.line(140, 180, 140, 210);
+            doc.line(80, 210, 140, 210);
+        } else if (tipoServico.includes("Cirurgia") || tipoServico.includes("Estético")) {
+            // Desenhar Símbolo de Saúde / Bem-estar
+            doc.line(110, 140, 110, 200);
+            doc.line(80, 170, 140, 170);
+            doc.circle(110, 170, 45, 'S');
+        } else {
+            // Estrela / Celebração (Festas / Cursos / Gerais)
+            doc.circle(110, 160, 50, 'S');
+            doc.circle(110, 160, 35, 'S');
+        }
+    };
+
+    desenharMarcaAguaClean();
+
+    // CABEÇALHO CLEAN
+    doc.setFillColor(11, 35, 65);
+    doc.rect(0, 0, 210, 5, 'F');
+
+    if (base64Logo) {
+        doc.addImage(base64Logo, 'PNG', 15, 15, 45, 25);
+    } else {
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(11, 35, 65);
+        doc.text("COMAUTO CONSÓRCIO", 15, 25);
+    }
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(11, 35, 65);
+    doc.text("PROPOSTA - CONSÓRCIO DE SERVIÇOS", 110, 23, {align: "left"});
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Planejamento Especializado | Tabela Vigente 2026`, 110, 30, {align: "left"});
+
+    doc.setDrawColor(241, 245, 249);
+    doc.line(15, 45, 195, 45);
+
+    // BOX CLIENTE E OBJETIVO
+    doc.setFillColor(248, 250, 252); doc.rect(15, 52, 180, 38, 'F');
+    doc.setDrawColor(226, 232, 240); doc.rect(15, 52, 180, 38, 'S');
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text(`CLIENTE: ${cliente.toUpperCase()}`, 22, 64);
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(51, 65, 85);
+    doc.text(`Objetivo do Projeto: `, 22, 73);
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(16, 185, 129);
+    doc.text(`${tipoServico}`, 60, 73);
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(100, 116, 139); doc.setFontSize(9);
+    doc.text(`Data de Emissão: ${dataFormatada} | Validade: Vigente`, 22, 82);
+
+    // DESTAQUE CRÉDITO E PARCELA
+    doc.setFillColor(236, 253, 245); doc.rect(15, 98, 180, 30, 'F');
+    doc.setDrawColor(187, 247, 208); doc.rect(15, 98, 180, 30, 'S');
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(16, 185, 129);
+    doc.text("VALOR DO CRÉDITO CONTRATADO", 22, 108);
+    doc.setFontSize(16); doc.setTextColor(11, 35, 65);
+    doc.text(`${formatarMoeda(item.credito)}`, 22, 118);
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(16, 185, 129);
+    doc.text("PARCELA MENSAL (58 MESES)", 115, 108);
+    doc.setFontSize(16); doc.setTextColor(11, 35, 65);
+    doc.text(`${formatarMoeda(item.parcela)} /mês`, 115, 118);
+
+    // CONDIÇÕES
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+    doc.text("Resumo das Condições do Plano", 15, 142);
+
+    let y = 152;
+    const resumoItens = [
+        ["Prazo Operacional do Grupo", "58 Meses Fixos"],
+        ["Código de Referência da Tabela", `${item.codigo} (${item.desc})`],
+        ["Taxa de Administração Total", "19,00% (Parcelas 1 a 6: 0,60% | Demais: 0,2962%)"],
+        ["Fundo de Reserva", "0,00% (Isento)"],
+        ["Seguro de Vida Opcional", "0,084% a.m."],
+        ["Custo Total Fixo de Tabela", `${formatarMoeda(item.parcela * 58)}`]
+    ];
+
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5);
+    resumoItens.forEach(i => {
+        doc.setTextColor(71, 85, 105); doc.text(i[0], 20, y);
+        doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65); doc.text(i[1], 125, y);
+        doc.setFont("Helvetica", "normal");
+        doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3);
+        y += 11;
+    });
+
+    // RODAPÉ
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, 280, 195, 280);
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
+    doc.text(`Consultor(a): ${consultor}`, 15, 287);
+    if(telConsultor) {
+        doc.text(` | Tel/WhatsApp: ${telConsultor}`, 85, 287);
+    }
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Página 1 de 1`, 195, 287, {align: "right"});
+
+    doc.save(`proposta comauto servicos - ${cliente}.pdf`);
 }
 
 function exportarPDFEstudoPersonalizado() {
