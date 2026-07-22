@@ -350,7 +350,6 @@
                 </select>
             </div>
 
-            <!-- FILTRO DE ANOS PARA O PDF -->
             <div class="row" id="boxFiltroAnosPdf">
                 <div class="form-group">
                     <label for="pdfAnoDe">Ano Inicial Veículos (FIPE)</label>
@@ -379,7 +378,6 @@
                 </div>
             </div>
 
-            <!-- DADOS BANCÁRIOS (SÓ APARECE SE FINANCIAMENTO ESTIVER ATIVO) -->
             <div id="boxFinanciamento">
                 <h2 class="section-divider">Mercado Bancário (Financiamento)</h2>
                 <div class="row">
@@ -427,7 +425,7 @@
     </div>
 </div>
 
-<!-- ABA 2: BUSCA POR FAIXA DE PARCELA (AUTO / IMÓVEL SEPARADOS) -->
+<!-- ABA 2: BUSCA POR FAIXA DE PARCELA -->
 <div id="abaBusca" class="tab-content">
     <div class="container-full">
         <div class="card">
@@ -558,7 +556,6 @@
                 <div class="res-desc" id="pResDescricao"></div>
             </div>
 
-            <!-- TABELA DE MODALIDADES DE ASSEMBLEIA -->
             <h2 class="section-divider">Regras de Contemplação em Assembleia</h2>
             <table class="table-results" style="margin-top:10px;">
                 <thead>
@@ -1267,7 +1264,7 @@ function desenharGrafico(c, f) {
 }
 
 function filtrarParcelas() {
-    const filtroTipoBem = document.getElementById("buscaTipoBem").value; // 'todos', 'auto', 'imovel'
+    const filtroTipoBem = document.getElementById("buscaTipoBem").value; 
     const vMin = parseFloat(document.getElementById("buscaMin").value) || 0;
     const vMax = parseFloat(document.getElementById("buscaMax").value) || 999999;
     const filtroModalidade = document.getElementById("buscaModalidade").value;
@@ -1280,10 +1277,9 @@ function filtrarParcelas() {
     Object.keys(bancoDadosComauto).forEach(gId => {
         const gData = bancoDadosComauto[gId];
         const prazo = gData.prazo;
-        const tipoBem = gData.tipoBem; // 'auto' ou 'imovel'
+        const tipoBem = gData.tipoBem;
         const cData = gData[perfil];
 
-        // Filtro pelo tipo do bem
         if (filtroTipoBem === "auto" && tipoBem !== "auto") return;
         if (filtroTipoBem === "imovel" && tipoBem !== "imovel") return;
 
@@ -1300,10 +1296,11 @@ function filtrarParcelas() {
                     if (valParc >= vMin && valParc <= vMax) {
                         const perfilNome = perfil === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica';
                         const modNome = modKey === 'leve' ? 'Parcela Leve (50%)' : (modKey === 'reduzida' ? 'Parcela Reduzida (75%)' : 'Parcela Linear (100%)');
-                        const bemNome = tipoBem === 'imovel' ? '🏠 Imóvel' : '🚗 Automóvel/Moto';
+                        const bemNomeWeb = tipoBem === 'imovel' ? '🏠 Imóvel' : '🚗 Automóvel/Moto';
+                        const bemNomePdf = tipoBem === 'imovel' ? 'Imóvel' : 'Automóvel/Moto';
 
                         resultadosFiltradosCache.push({
-                            tipoBem: bemNome,
+                            tipoBem: bemNomePdf,
                             grupo: `Grupo ${gId} - ${perfilNome}`,
                             prazo: `${prazo} meses`,
                             credito: parseFloat(valCred),
@@ -1313,7 +1310,7 @@ function filtrarParcelas() {
 
                         const tr = document.createElement("tr");
                         tr.innerHTML = `
-                            <td><span class="badge-tipo">${bemNome}</span></td>
+                            <td><span class="badge-tipo">${bemNomeWeb}</span></td>
                             <td><strong>Grupo ${gId}</strong> (${perfilNome})</td>
                             <td>${prazo} meses</td>
                             <td>R$ ${parseInt(valCred).toLocaleString('pt-BR')},00</td>
@@ -1647,7 +1644,6 @@ function exportarPDFServicos() {
     const dataHoje = new Date();
     const dataFormatada = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
 
-    // CABEÇALHO CLEAN
     doc.setFillColor(11, 35, 65);
     doc.rect(0, 0, 210, 5, 'F');
 
@@ -1666,7 +1662,6 @@ function exportarPDFServicos() {
     doc.setDrawColor(241, 245, 249);
     doc.line(15, 45, 195, 45);
 
-    // BOX CLIENTE E OBJETIVO
     doc.setFillColor(248, 250, 252); doc.rect(15, 52, 180, 38, 'F');
     doc.setDrawColor(226, 232, 240); doc.rect(15, 52, 180, 38, 'S');
 
@@ -1679,7 +1674,6 @@ function exportarPDFServicos() {
     doc.setFont("Helvetica", "normal"); doc.setTextColor(100, 116, 139); doc.setFontSize(9);
     doc.text(`Data de Emissão: ${dataFormatada} | Validade: Vigente`, 22, 82);
 
-    // DESTAQUE CRÉDITO E PARCELA
     doc.setFillColor(236, 253, 245); doc.rect(15, 98, 180, 30, 'F');
     doc.setDrawColor(187, 247, 208); doc.rect(15, 98, 180, 30, 'S');
 
@@ -1693,7 +1687,6 @@ function exportarPDFServicos() {
     doc.setFontSize(16); doc.setTextColor(11, 35, 65);
     doc.text(`${formatarMoeda(item.parcela)} /mês`, 115, 118);
 
-    // CONDIÇÕES
     doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
     doc.text("Resumo das Condições do Plano", 15, 142);
 
@@ -1716,7 +1709,6 @@ function exportarPDFServicos() {
         y += 11;
     });
 
-    // RODAPÉ COM IDENTIFICAÇÃO E CONTATO
     doc.setDrawColor(226, 232, 240);
     doc.line(15, 280, 195, 280);
     doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
@@ -1730,7 +1722,6 @@ function exportarPDFServicos() {
     doc.save(`proposta comauto servicos - ${cliente}.pdf`);
 }
 
-/* FILTRO E IMPRESSÃO DE TABELA DE SERVIÇOS POR FAIXA DE PARCELA */
 function filtrarServicosPorParcela() {
     const vMin = parseFloat(document.getElementById("sBuscaMin").value) || 0;
     const vMax = parseFloat(document.getElementById("sBuscaMax").value) || 999999;
@@ -1824,7 +1815,6 @@ function exportarPDFTabelaServicosFiltrada() {
         y += 10;
     });
 
-    // RODAPÉ
     doc.setDrawColor(226, 232, 240);
     doc.line(15, 280, 195, 280);
     doc.setFont("Helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(11, 35, 65);
@@ -1897,26 +1887,30 @@ function exportarPDFEstudoPersonalizado() {
     doc.setFillColor(248, 250, 252);
     doc.rect(15, y, 180, 10, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
+    
+    // CABEÇALHO CORRIGIDO COM POSIÇÕES X ESPAÇADAS
     doc.text("TIPO BEM", 18, y + 6.5);
-    doc.text("GRUPO / PERFIL", 55, y + 6.5);
-    doc.text("PRAZO", 100, y + 6.5);
-    doc.text("CRÉDITO", 125, y + 6.5);
-    doc.text("PARCELA SELECIONADA", 155, y + 6.5);
+    doc.text("GRUPO / PERFIL", 58, y + 6.5);
+    doc.text("PRAZO", 115, y + 6.5);
+    doc.text("CRÉDITO", 138, y + 6.5);
+    doc.text("PARCELA SELECIONADA", 165, y + 6.5);
 
     y += 12;
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
 
-    resultadosFiltradosCache.forEach((item, index) => {
+    resultadosFiltradosCache.forEach((item) => {
         if(y > 250) {
             doc.addPage();
             y = 20;
         }
+        
+        // VALORES IMPRESSOS SEM EMOJIS PARA NÃO QUEBRAR A FONTE
         doc.text(item.tipoBem, 18, y);
-        doc.text(item.grupo, 55, y);
-        doc.text(item.prazo, 100, y);
-        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 125, y);
+        doc.text(item.grupo, 58, y);
+        doc.text(item.prazo, 115, y);
+        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 138, y);
         doc.setFont("Helvetica", "bold");
-        doc.text(`${formatarMoeda(item.valParcela)}`, 155, y);
+        doc.text(`${formatarMoeda(item.valParcela)}`, 165, y);
         doc.setFont("Helvetica", "normal");
         
         doc.setDrawColor(241, 245, 249);
@@ -2041,7 +2035,6 @@ function exportarPDFPropostaViva() {
         doc.text(`Página ${pagina} de ${totalPaginas}`, 195, 287, {align: "right"});
     };
 
-    // --- PÁGINA 1: ESTRUTURA PRINCIPAL ---
     aplicarCabecalho("PROPOSTA DE CONSÓRCIO", "Planejamento Inteligente de Ativos");
     
     doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
@@ -2083,7 +2076,6 @@ function exportarPDFPropostaViva() {
         doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 11;
     });
 
-    // --- SEÇÃO DE FINANCIAMENTO (SE ATIVADO) ---
     if (modoConteudo === 'ambos' || modoConteudo === 'financ') {
         doc.addPage();
         aplicarCabecalho("ANÁLISE DE CUSTO-BENEFÍCIO", "Consórcio Comauto vs Financiamento");
@@ -2113,7 +2105,6 @@ function exportarPDFPropostaViva() {
         doc.text(`ECONOMIA LÍQUIDA GERADA PARA O CLIENTE: ${formatarMoeda(economiaTotal)}`, 22, 173);
     }
 
-    // --- SEÇÃO DE PODER DE COMPRA / VEÍCULOS (SE ATIVADO) ---
     if (modoConteudo === 'ambos' || modoConteudo === 'poderCompra') {
         doc.addPage();
         aplicarCabecalho("ESTUDO DE PODER DE COMPRA", `Modelos Sugeridos no Mercado FIPE`);
@@ -2159,7 +2150,6 @@ function exportarPDFPropostaViva() {
         }
     }
 
-    // --- RECALCULO DE LANCE ---
     doc.addPage();
     aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
     
