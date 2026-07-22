@@ -330,13 +330,25 @@
                 </div>
             </div>
 
+            <h2 class="section-divider">Estratégia de Lance & Embutido</h2>
             <div class="row">
                 <div class="form-group">
-                    <label for="valorLance">Lance Estratégico Ofertado (R$)</label>
-                    <input type="number" id="valorLance" value="9000" oninput="calcularTudo()">
+                    <label for="lanceEmbutido">Lance Embutido Utilizado (R$)</label>
+                    <input type="number" id="lanceEmbutido" value="0" placeholder="Ex: 10000" oninput="calcularTudo()">
                 </div>
                 <div class="form-group">
-                    <label for="mesContemplacao">Mês da Contemplação</label>
+                    <label for="lanceBolso">Lance do Bolso / Recursos Próprios (R$)</label>
+                    <input type="number" id="lanceBolso" value="9000" placeholder="Ex: 5000" oninput="calcularTudo()">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="valorLance">Lance Total Ofertado (R$)</label>
+                    <input type="number" id="valorLance" value="9000" readonly style="font-weight: 800; color: var(--comauto-blue);">
+                </div>
+                <div class="form-group">
+                    <label for="mesContemplacao">Mês Pretendido da Contemplação</label>
                     <input type="number" id="mesContemplacao" value="1" min="1" oninput="calcularTudo()">
                 </div>
             </div>
@@ -345,9 +357,10 @@
             <div class="form-group">
                 <label for="tipoConteudoPdf">Conteúdo a Incluir no PDF</label>
                 <select id="tipoConteudoPdf" onchange="alternarCamposPdf()">
-                    <option value="ambos" selected>Financiamento + Poder de Compra (Veículos FIPE)</option>
-                    <option value="financ">Apenas Comparativo com Financiamento Bancário</option>
-                    <option value="poderCompra">Apenas Poder de Compra (Veículos FIPE)</option>
+                    <option value="apenasProposta">📄 Apenas a Proposta do Consórcio (Sem Comparativo / Sem Veículos)</option>
+                    <option value="ambos" selected>📊 Completo (Proposta + Financiamento + Veículos FIPE)</option>
+                    <option value="financ">📈 Proposta + Comparativo com Financiamento</option>
+                    <option value="poderCompra">🚗 Proposta + Poder de Compra (Veículos FIPE)</option>
                 </select>
             </div>
 
@@ -405,21 +418,26 @@
 
         <div class="card">
             <h2>Painel Comparativo</h2>
+            <div class="result-box highlight">
+                <div class="res-label" style="color: var(--success-green);">Crédito Líquido na Mão do Cliente</div>
+                <div class="res-val" id="resCreditoLiquido" style="color: var(--success-green);">R$ 0,00</div>
+                <div class="res-desc" id="descCreditoLiquido">Crédito contratado descontando o lance embutido utilizado.</div>
+            </div>
             <div class="result-box">
                 <div class="res-label">Consórcio Comauto (Parcela Inicial)</div>
                 <div class="res-val" id="resConsorcio">R$ 0,00</div>
                 <div class="res-desc" id="descConsorcio"></div>
             </div>
-            <div class="result-box">
+            <div class="result-box" id="boxCardFinanc">
                 <div class="res-label" id="labelFinanc">Financiamento Bancário</div>
                 <div class="res-val" id="resFinanc">R$ 0,00</div>
                 <div class="res-desc" id="descFinanc"></div>
             </div>
-            <div class="result-box highlight">
+            <div class="result-box highlight" id="boxCardEconomia">
                 <div class="res-label" style="color: var(--success-green);">Economia Real Gerada</div>
                 <div class="res-val" id="resEconomia" style="color: var(--success-green);">R$ 0,00</div>
             </div>
-            <div class="chart-container">
+            <div class="chart-container" id="boxGrafico">
                 <canvas id="graficoComparativo"></canvas>
             </div>
         </div>
@@ -1047,16 +1065,35 @@ function alternarCamposPdf() {
     const modo = document.getElementById("tipoConteudoPdf").value;
     const boxFinanc = document.getElementById("boxFinanciamento");
     const boxAnos = document.getElementById("boxFiltroAnosPdf");
+    
+    const boxCardFinanc = document.getElementById("boxCardFinanc");
+    const boxCardEconomia = document.getElementById("boxCardEconomia");
+    const boxGrafico = document.getElementById("boxGrafico");
 
-    if (modo === "financ") {
+    if (modo === "apenasProposta") {
+        boxFinanc.style.display = "none";
+        boxAnos.style.display = "none";
+        if (boxCardFinanc) boxCardFinanc.style.display = "none";
+        if (boxCardEconomia) boxCardEconomia.style.display = "none";
+        if (boxGrafico) boxGrafico.style.display = "none";
+    } else if (modo === "financ") {
         boxFinanc.style.display = "block";
         boxAnos.style.display = "none";
+        if (boxCardFinanc) boxCardFinanc.style.display = "block";
+        if (boxCardEconomia) boxCardEconomia.style.display = "block";
+        if (boxGrafico) boxGrafico.style.display = "block";
     } else if (modo === "poderCompra") {
         boxFinanc.style.display = "none";
         boxAnos.style.display = "flex";
+        if (boxCardFinanc) boxCardFinanc.style.display = "none";
+        if (boxCardEconomia) boxCardEconomia.style.display = "none";
+        if (boxGrafico) boxGrafico.style.display = "none";
     } else { 
         boxFinanc.style.display = "block";
         boxAnos.style.display = "flex";
+        if (boxCardFinanc) boxCardFinanc.style.display = "block";
+        if (boxCardEconomia) boxCardEconomia.style.display = "block";
+        if (boxGrafico) boxGrafico.style.display = "block";
     }
 }
 
@@ -1188,7 +1225,19 @@ function calcularTudo() {
     const perfil = document.getElementById("perfil").value;
     const credito = parseFloat(document.getElementById("credito").value) || 0;
     let tipoParcela = document.getElementById("tipoParcela").value;
-    const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
+    
+    // LANCE EMBUTIDO + BOLSO
+    const lEmbutido = parseFloat(document.getElementById("lanceEmbutido").value) || 0;
+    const lBolso = parseFloat(document.getElementById("lanceBolso").value) || 0;
+    const valorLance = lEmbutido + lBolso;
+    document.getElementById("valorLance").value = valorLance;
+
+    const creditoLiquido = credito - lEmbutido;
+    document.getElementById("resCreditoLiquido").textContent = formatarMoeda(creditoLiquido);
+    document.getElementById("descCreditoLiquido").textContent = lEmbutido > 0 
+        ? `Crédito Bruto: ${formatarMoeda(credito)} (-) Embutido de ${formatarMoeda(lEmbutido)}.`
+        : `Crédito Bruto Total na Mão (Sem desconto de embutido).`;
+
     const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
     const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value) || 60;
     
@@ -1255,7 +1304,9 @@ function calcularTudo() {
 }
 
 function desenharGrafico(c, f) {
-    const ctx = document.getElementById('graficoComparativo').getContext('2d');
+    const canvas = document.getElementById('graficoComparativo');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (chartInstance) chartInstance.destroy();
     
     chartInstance = new Chart(ctx, {
@@ -1612,11 +1663,11 @@ async function fipeConsultarValor() {
 
 function fipeUsarComoLance() {
     if(fipeValorNumCache > 0) {
-        document.getElementById("valorLance").value = fipeValorNumCache;
+        document.getElementById("lanceBolso").value = fipeValorNumCache;
         document.getElementById("pValorLance").value = fipeValorNumCache;
         calcularTudo();
         pAtualizarLanceReais();
-        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} aplicado com sucesso como lance nas simulações!`);
+        alert(`Valor FIPE de ${formatarMoeda(fipeValorNumCache)} aplicado com sucesso como lance do bolso/troca nas simulações!`);
     }
 }
 
@@ -1967,7 +2018,13 @@ function exportarPDFPropostaViva() {
     const perfil = document.getElementById("perfil").value;
     const credito = parseFloat(document.getElementById("credito").value);
     const tipoParcela = document.getElementById("tipoParcela").value;
-    const valorLance = parseFloat(document.getElementById("valorLance").value) || 0;
+    
+    // LANCE EMBUTIDO + BOLSO
+    const lEmbutido = parseFloat(document.getElementById("lanceEmbutido").value) || 0;
+    const lBolso = parseFloat(document.getElementById("lanceBolso").value) || 0;
+    const valorLance = lEmbutido + lBolso;
+    const creditoLiquido = credito - lEmbutido;
+
     const mesContemplacao = parseInt(document.getElementById("mesContemplacao").value) || 1;
     const prazoFinanc = parseInt(document.getElementById("prazoFinanciamento").value) || 60;
     const jurosInputText = document.getElementById("jurosFinanc").value;
@@ -2052,30 +2109,34 @@ function exportarPDFPropostaViva() {
     aplicarCabecalho("PROPOSTA DE CONSÓRCIO", "Planejamento Inteligente de Ativos");
     
     doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text("ANÁLISE COMERCIAL GERAL", 15, 58); 
+    doc.text("ANÁLISE COMERCIAL GERAL", 15, 52); 
     
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
-    doc.text(`Consultor: ${consultor}`, 140, 58);
-    doc.text(`Emissão: ${dataFormatada}`, 140, 64);
+    doc.text(`Consultor: ${consultor}`, 140, 52);
+    doc.text(`Emissão: ${dataFormatada}`, 140, 58);
     
-    doc.setFillColor(248, 250, 252); doc.rect(15, 75, 180, 42, 'F');
-    doc.setDrawColor(226, 232, 240); doc.rect(15, 75, 180, 42, 'S');
+    doc.setFillColor(248, 250, 252); doc.rect(15, 65, 180, 42, 'F');
+    doc.setDrawColor(226, 232, 240); doc.rect(15, 65, 180, 42, 'S');
     
     doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65); doc.setFontSize(10.5);
-    doc.text(`CLIENTE EXCLUSIVO: ${cliente.toUpperCase()}`, 22, 88);
+    doc.text(`CLIENTE EXCLUSIVO: ${cliente.toUpperCase()}`, 22, 78);
     doc.setFont("Helvetica", "normal"); doc.setTextColor(51, 65, 85);
-    doc.text(`Valor de Crédito Desejado: R$ ${credito.toLocaleString('pt-BR')},00`, 22, 97);
-    doc.text(`Parcela Contratada Base: R$ ${parcelaC.toFixed(2)}/mês`, 22, 106);
+    doc.text(`Valor de Crédito Contratado (Bruto): R$ ${credito.toLocaleString('pt-BR')},00`, 22, 87);
+    doc.text(`Parcela Contratada Base: R$ ${parcelaC.toFixed(2)}/mês`, 22, 96);
     
-    doc.setFillColor(254, 243, 199); doc.rect(15, 127, 180, 14, 'F');
-    doc.setFont("Helvetica", "bold"); doc.setTextColor(146, 64, 14); doc.setFontSize(9.5);
-    doc.text(`ESTRATÉGIA DE LANCE OFERTADO: R$ ${valorLance.toLocaleString('pt-BR')},00 (${pctLance.toFixed(2)}%)`, 22, 136);
-    
+    // CAIXA DE EMBUTIDO E CRÉDITO LÍQUIDO NA MÃO
+    doc.setFillColor(236, 253, 245); doc.rect(15, 113, 180, 26, 'F');
+    doc.setDrawColor(187, 247, 208); doc.rect(15, 113, 180, 26, 'S');
+    doc.setFont("Helvetica", "bold"); doc.setTextColor(16, 185, 129); doc.setFontSize(9.5);
+    doc.text(`CRÉDITO LÍQUIDO NA MÃO DO CLIENTE: ${formatarMoeda(creditoLiquido)}`, 22, 123);
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(51, 65, 85);
+    doc.text(`Composição do Lance: Embutido: ${formatarMoeda(lEmbutido)} | Recursos Próprios / Bolso: ${formatarMoeda(lBolso)} (Total: ${formatarMoeda(valorLance)} - ${pctLance.toFixed(2)}%)`, 22, 132);
+
     doc.setTextColor(11, 35, 65); doc.setFont("Helvetica", "bold"); doc.setFontSize(11);
-    doc.text("Condições e Estrutura Contratual", 15, 160);
+    doc.text("Condições e Estrutura Contratual", 15, 148);
     
     doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105); doc.setFontSize(9.5);
-    let y = 172;
+    let y = 158;
     const itens = [
         ["Prazo Operacional do Grupo", `${prazo} meses`],
         ["Taxa de Administração Total Contratada", `R$ ${txAdmReais.toLocaleString('pt-BR')},00 (${taxaAdmInserida.toFixed(1)}%)`],
@@ -2087,7 +2148,7 @@ function exportarPDFPropostaViva() {
     itens.forEach(i => {
         doc.text(i[0], 20, y); doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
         doc.text(i[1], 135, y); doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
-        doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 11;
+        doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 10;
     });
 
     if (modoConteudo === 'ambos' || modoConteudo === 'financ') {
@@ -2124,12 +2185,12 @@ function exportarPDFPropostaViva() {
         aplicarCabecalho("ESTUDO DE PODER DE COMPRA", `Modelos Sugeridos no Mercado FIPE`);
         
         doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-        doc.text(`VEÍCULOS COMPATÍVEIS COM O CRÉDITO DE ${formatarMoeda(credito)}`, 15, 58);
+        doc.text(`VEÍCULOS COMPATÍVEIS COM O CRÉDITO LÍQUIDO DE ${formatarMoeda(creditoLiquido)}`, 15, 58);
         doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
         doc.text(`Filtro aplicado: Veículos entre o ano ${pdfAnoDe} e ${pdfAnoAte}`, 15, 65);
 
         const modelosFiltrados = catalogoVeiculos.filter(c => {
-            const atendePreco = c.preco <= (credito * 1.15);
+            const atendePreco = c.preco <= (creditoLiquido * 1.15);
             const atendeAno = c.ano >= pdfAnoDe && c.ano <= pdfAnoAte;
             return atendePreco && atendeAno;
         });
@@ -2164,32 +2225,42 @@ function exportarPDFPropostaViva() {
         }
     }
 
-    doc.addPage();
-    aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
+    if (modoConteudo !== 'apenasProposta') {
+        doc.addPage();
+        aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
+    } else {
+        y += 12;
+        doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
+        doc.text("ESTRATÉGIA DE CONTEMPLAÇÃO (REDUÇÃO DE PARCELA)", 15, y);
+        y += 10;
+    }
     
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text(`EVOLUÇÃO FINANCEIRA APÓS CONTEMPLAÇÃO (MÊS ${mesContemplacao})`, 15, 58);
+    let yBase = modoConteudo === 'apenasProposta' ? y : 58;
+
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(11, 35, 65);
+    doc.text(`EVOLUÇÃO FINANCEIRA APÓS CONTEMPLAÇÃO (MÊS ${mesContemplacao})`, 15, yBase);
     
-    doc.setFont("Helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(100, 116, 139);
-    doc.text(`Demonstração do abatimento imediato no saldo devedor com o lance líquido de ${formatarMoeda(valorLance)}.`, 15, 68);
+    doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+    doc.text(`Demonstração do abatimento imediato no saldo devedor com o lance total de ${formatarMoeda(valorLance)}.`, 15, yBase + 7);
 
-    doc.setFillColor(241, 245, 249); doc.rect(15, 80, 54, 24, 'F');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.text("PARCELA ORIGINAL", 19, 87);
-    doc.setFontSize(10); doc.setTextColor(11, 35, 65); doc.text(`${formatarMoeda(parcelaC)}`, 19, 97);
+    doc.setFillColor(241, 245, 249); doc.rect(15, yBase + 14, 54, 22, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(100, 116, 139); doc.text("PARCELA ORIGINAL", 19, yBase + 21);
+    doc.setFontSize(9.5); doc.setTextColor(11, 35, 65); doc.text(`${formatarMoeda(parcelaC)}`, 19, yBase + 30);
 
-    doc.setFillColor(254, 243, 199); doc.rect(78, 80, 54, 24, 'F');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(146, 64, 14); doc.text("ABATIMENTO LANCE", 82, 87);
-    doc.setFontSize(10); doc.text(`${formatarMoeda(valorLance)}`, 82, 97);
+    doc.setFillColor(254, 243, 199); doc.rect(78, yBase + 14, 54, 22, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(146, 64, 14); doc.text("ABATIMENTO LANCE", 82, yBase + 21);
+    doc.setFontSize(9.5); doc.text(`${formatarMoeda(valorLance)}`, 82, yBase + 30);
 
-    doc.setFillColor(220, 252, 231); doc.rect(141, 80, 54, 24, 'F');
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(21, 128, 61); doc.text("NOVA MENSALIDADE", 145, 87);
-    doc.setFontSize(10); doc.text(`${formatarMoeda(novaParcela)}`, 145, 97);
+    doc.setFillColor(220, 252, 231); doc.rect(141, yBase + 14, 54, 22, 'F');
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(21, 128, 61); doc.text("NOVA MENSALIDADE", 145, yBase + 21);
+    doc.setFontSize(9.5); doc.text(`${formatarMoeda(novaParcela)}`, 145, yBase + 30);
 
-    doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-    doc.text("Memorial Descritivo do Saldo Remanescente", 15, 122);
+    let y3 = yBase + 46;
+    doc.setFont("Helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(11, 35, 65);
+    doc.text("Memorial Descritivo do Saldo Remanescente", 15, y3);
     
-    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105); doc.setFontSize(9.5);
-    let y3 = 134;
+    y3 += 10;
+    doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105); doc.setFontSize(9);
     
     let linhasCalculo = [];
     if(tipoParcela === "linear") {
@@ -2217,7 +2288,7 @@ function exportarPDFPropostaViva() {
     linhasCalculo.forEach(c => {
         doc.text(c[0], 20, y3); doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
         doc.text(c[1], 140, y3); doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
-        doc.setDrawColor(241, 245, 249); doc.line(15, y3+2, 195, y3+2); y3 += 10;
+        doc.setDrawColor(241, 245, 249); doc.line(15, y3+2, 195, y3+2); y3 += 8.5;
     });
 
     const totalPages = doc.internal.getNumberOfPages();
