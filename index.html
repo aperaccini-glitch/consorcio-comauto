@@ -169,7 +169,9 @@
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
         .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 20px; }
-        @media(max-width: 900px) { .row-4, .row-3 { grid-template-columns: 1fr 1fr; } }
+        .row-5 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 15px; }
+        @media(max-width: 1024px) { .row-5 { grid-template-columns: 1fr 1fr 1fr; } }
+        @media(max-width: 900px) { .row-4, .row-3, .row-5 { grid-template-columns: 1fr 1fr; } }
 
         .btn-group { display: flex; gap: 15px; margin-top: 30px; }
         button { 
@@ -211,6 +213,7 @@
         .table-results tr:hover { background-color: #f8fafc; }
         .badge-leve { background-color: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
         .badge-linear { background-color: #e0f2fe; color: #075985; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .badge-tipo { background-color: #f1f5f9; color: var(--comauto-blue); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
 
         /* CALCULADORA */
         .calc-wrapper { background-color: var(--bg-main); border-radius: 16px; padding: 20px; border: 1px solid var(--card-border); }
@@ -424,19 +427,27 @@
     </div>
 </div>
 
-<!-- ABA 2: BUSCA POR FAIXA DE PARCELA (AUTO / IMÓVEL) -->
+<!-- ABA 2: BUSCA POR FAIXA DE PARCELA (AUTO / IMÓVEL SEPARADOS) -->
 <div id="abaBusca" class="tab-content">
     <div class="container-full">
         <div class="card">
             <h2>Estudo de Parcelas Personalizado (Auto / Imóvel)</h2>
-            <div class="row-4">
+            <div class="row-5">
+                <div class="form-group">
+                    <label for="buscaTipoBem">Tipo de Bem</label>
+                    <select id="buscaTipoBem" onchange="filtrarParcelas()">
+                        <option value="todos" selected>Todos os Bens</option>
+                        <option value="auto">🚗 Apenas Automóveis / Motos</option>
+                        <option value="imovel">🏠 Apenas Imóveis</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="buscaMin">Parcela Mínima (R$)</label>
                     <input type="number" id="buscaMin" value="300" oninput="filtrarParcelas()">
                 </div>
                 <div class="form-group">
                     <label for="buscaMax">Parcela Máxima (R$)</label>
-                    <input type="number" id="buscaMax" value="400" oninput="filtrarParcelas()">
+                    <input type="number" id="buscaMax" value="1000" oninput="filtrarParcelas()">
                 </div>
                 <div class="form-group">
                     <label for="buscaModalidade">Modalidade da Parcela</label>
@@ -462,7 +473,8 @@
             <table class="table-results" id="tabelaResultadosBusca">
                 <thead>
                     <tr>
-                        <th>Grupo / Categoria</th>
+                        <th>Tipo de Bem</th>
+                        <th>Grupo / Perfil</th>
                         <th>Prazo</th>
                         <th>Valor do Crédito</th>
                         <th>Tipo de Parcela</th>
@@ -884,6 +896,7 @@
 const bancoDadosComauto = {
     "51": {
         prazo: 162,
+        tipoBem: "imovel",
         PF: {
             "156660": { linear: 1189.46, leve: 594.73 },
             "182770": { linear: 1387.70, leve: 693.85 },
@@ -905,16 +918,19 @@ const bancoDadosComauto = {
     },
     "1641": {
         prazo: 44,
+        tipoBem: "auto",
         PF: { "34250": { linear: 928.25 }, "45665": { linear: 1237.62 }, "57082": { linear: 1547.04 }, "68498": { linear: 1856.44 } },
         PJ: { "34250": { linear: 895.16 }, "45665": { linear: 1193.50 }, "57082": { linear: 1491.90 }, "68498": { linear: 1790.27 } }
     },
     "1642": {
         prazo: 50,
+        tipoBem: "auto",
         PF: { "43927": { linear: 1052.75 }, "54909": { linear: 1315.95 }, "65891": { linear: 1579.14 }, "76873": { linear: 1842.34 }, "87855": { linear: 2105.53 } },
         PJ: { "43927": { linear: 1010.32 }, "54909": { linear: 1262.91 }, "65891": { linear: 1515.49 }, "76873": { linear: 1768.08 }, "87855": { linear: 2020.67 } }
     },
     "1643": {
         prazo: 46,
+        tipoBem: "auto",
         PF: { 
             "16544": { linear: 413.60 }, "18198": { linear: 454.95 }, "19853": { linear: 496.32 }, 
             "21506": { linear: 537.65 }, "23161": { linear: 579.02 }, "24815": { linear: 620.37 }, 
@@ -930,26 +946,31 @@ const bancoDadosComauto = {
     },
     "1644": {
         prazo: 58,
+        tipoBem: "auto",
         PF: { "55146": { linear: 1146.66 }, "66175": { linear: 1375.99 }, "77204": { linear: 1605.31 }, "88233": { linear: 1834.64 }, "99262": { linear: 2063.97 }, "110291": { linear: 2293.30 } },
         PJ: { "55146": { linear: 1093.39 }, "66175": { linear: 1312.06 }, "77204": { linear: 1530.74 }, "88233": { linear: 1749.41 }, "99262": { linear: 1968.08 }, "110291": { linear: 2186.76 } }
     },
     "1645": {
         prazo: 66,
+        tipoBem: "auto",
         PF: { "52220": { linear: 960.37 }, "62664": { linear: 1152.44 }, "73108": { linear: 1344.51 }, "83552": { linear: 1536.59 }, "93996": { linear: 1728.66 }, "104440": { linear: 1920.74 } },
         PJ: { "52220": { linear: 909.92 }, "62664": { linear: 1091.91 }, "73108": { linear: 1273.89 }, "83552": { linear: 1455.88 }, "93996": { linear: 1637.86 }, "104440": { linear: 1819.85 } }
     },
     "1646": {
         prazo: 58,
+        tipoBem: "auto",
         PF: { "15708": { linear: 326.62 }, "17279": { linear: 359.28 }, "18850": { linear: 391.95 }, "20420": { linear: 424.60 }, "21991": { linear: 457.26 }, "23562": { linear: 489.93 }, "25133": { linear: 522.59 }, "26704": { linear: 555.26 }, "28274": { linear: 587.91 }, "29845": { linear: 620.57 }, "31416": { linear: 653.24 } },
         PJ: { "15708": { linear: 311.44 }, "17279": { linear: 342.59 }, "18850": { linear: 373.74 }, "20420": { linear: 404.87 }, "21991": { linear: 436.02 }, "23562": { linear: 489.93 }, "25133": { linear: 498.32 }, "26704": { linear: 529.46 }, "28274": { linear: 560.59 }, "29845": { linear: 591.74 }, "31416": { linear: 622.89 } }
     },
     "1647": {
         prazo: 94,
+        tipoBem: "auto",
         PF: { "75000": { linear: 989.98, leve: 510.95 }, "90000": { linear: 1187.97, leve: 613.13 }, "105000": { linear: 1385.97, leve: 715.32 }, "120000": { linear: 1583.96, leve: 817.51 }, "135000": { linear: 1781.96, leve: 919.70 }, "150000": { linear: 1979.96, leve: 1021.89 } },
         PJ: { "75000": { linear: 917.53, leve: 474.72 }, "90000": { linear: 1101.03, leve: 569.66 }, "105000": { linear: 1284.54, leve: 664.61 }, "120000": { linear: 1468.04, leve: 759.55 }, "135000": { linear: 1651.55, leve: 854.50 }, "150000": { linear: 1835.06, leve: 949.44 } }
     },
     "1648": {
         prazo: 68,
+        tipoBem: "auto",
         PF: { "30000": { linear: 536.34, leve: 276.99 }, "35000": { linear: 625.73, leve: 323.16 }, "40000": { linear: 715.12, leve: 369.32 }, "45000": { linear: 804.51, leve: 415.49 }, "50000": { linear: 893.90, leve: 461.65 }, "55000": { linear: 983.28, leve: 507.82 }, "60000": { linear: 1072.67, leve: 553.98 } },
         PJ: { "30000": { linear: 507.36, leve: 262.50 }, "35000": { linear: 591.92, leve: 306.25 }, "40000": { linear: 676.48, leve: 350.00 }, "45000": { linear: 761.04, leve: 393.75 }, "50000": { linear: 845.60, leve: 437.50 }, "55000": { linear: 930.15, leve: 481.25 }, "60000": { linear: 1014.71, leve: 525.00 } }
     }
@@ -1020,7 +1041,7 @@ function alternarCamposPdf() {
     } else if (modo === "poderCompra") {
         boxFinanc.style.display = "none";
         boxAnos.style.display = "flex";
-    } else { // ambos
+    } else { 
         boxFinanc.style.display = "block";
         boxAnos.style.display = "flex";
     }
@@ -1246,6 +1267,7 @@ function desenharGrafico(c, f) {
 }
 
 function filtrarParcelas() {
+    const filtroTipoBem = document.getElementById("buscaTipoBem").value; // 'todos', 'auto', 'imovel'
     const vMin = parseFloat(document.getElementById("buscaMin").value) || 0;
     const vMax = parseFloat(document.getElementById("buscaMax").value) || 999999;
     const filtroModalidade = document.getElementById("buscaModalidade").value;
@@ -1258,7 +1280,12 @@ function filtrarParcelas() {
     Object.keys(bancoDadosComauto).forEach(gId => {
         const gData = bancoDadosComauto[gId];
         const prazo = gData.prazo;
+        const tipoBem = gData.tipoBem; // 'auto' ou 'imovel'
         const cData = gData[perfil];
+
+        // Filtro pelo tipo do bem
+        if (filtroTipoBem === "auto" && tipoBem !== "auto") return;
+        if (filtroTipoBem === "imovel" && tipoBem !== "imovel") return;
 
         if (cData) {
             Object.keys(cData).forEach(valCred => {
@@ -1273,8 +1300,10 @@ function filtrarParcelas() {
                     if (valParc >= vMin && valParc <= vMax) {
                         const perfilNome = perfil === 'PF' ? 'Pessoa Física' : 'Pessoa Jurídica';
                         const modNome = modKey === 'leve' ? 'Parcela Leve (50%)' : (modKey === 'reduzida' ? 'Parcela Reduzida (75%)' : 'Parcela Linear (100%)');
-                        
+                        const bemNome = tipoBem === 'imovel' ? '🏠 Imóvel' : '🚗 Automóvel/Moto';
+
                         resultadosFiltradosCache.push({
+                            tipoBem: bemNome,
                             grupo: `Grupo ${gId} - ${perfilNome}`,
                             prazo: `${prazo} meses`,
                             credito: parseFloat(valCred),
@@ -1284,6 +1313,7 @@ function filtrarParcelas() {
 
                         const tr = document.createElement("tr");
                         tr.innerHTML = `
+                            <td><span class="badge-tipo">${bemNome}</span></td>
                             <td><strong>Grupo ${gId}</strong> (${perfilNome})</td>
                             <td>${prazo} meses</td>
                             <td>R$ ${parseInt(valCred).toLocaleString('pt-BR')},00</td>
@@ -1298,7 +1328,7 @@ function filtrarParcelas() {
     });
 
     if (resultadosFiltradosCache.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhuma opção encontrada nessa faixa de valor ou modalidade. Tente ajustar os filtros.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted); padding:20px;">Nenhuma opção encontrada nessa faixa de valor, categoria ou modalidade. Tente ajustar os filtros.</td></tr>`;
     }
 }
 
@@ -1494,7 +1524,7 @@ async function fipeCarregarModelos() {
     if(!marca) return;
     
     selModelo.innerHTML = "<option value=''>Carregando modelos...</option>"; selModelo.disabled = true;
-    selAno.innerHTML = "<option value=''>Selecione o Modelo...</option>"; selAno.disabled = true;
+    selAno.innerHTML = "<option value=''>Selecione a Marca...</option>"; selAno.disabled = true;
     document.getElementById("fipeBoxResultado").style.display = "none";
 
     try {
@@ -1867,10 +1897,11 @@ function exportarPDFEstudoPersonalizado() {
     doc.setFillColor(248, 250, 252);
     doc.rect(15, y, 180, 10, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
-    doc.text("GRUPO / CATEGORIA", 18, y + 6.5);
-    doc.text("PRAZO", 80, y + 6.5);
-    doc.text("VALOR DO CRÉDITO", 110, y + 6.5);
-    doc.text("PARCELA SELECIONADA", 150, y + 6.5);
+    doc.text("TIPO BEM", 18, y + 6.5);
+    doc.text("GRUPO / PERFIL", 55, y + 6.5);
+    doc.text("PRAZO", 100, y + 6.5);
+    doc.text("CRÉDITO", 125, y + 6.5);
+    doc.text("PARCELA SELECIONADA", 155, y + 6.5);
 
     y += 12;
     doc.setFont("Helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(51, 65, 85);
@@ -1880,11 +1911,12 @@ function exportarPDFEstudoPersonalizado() {
             doc.addPage();
             y = 20;
         }
-        doc.text(item.grupo, 18, y);
-        doc.text(item.prazo, 80, y);
-        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 110, y);
+        doc.text(item.tipoBem, 18, y);
+        doc.text(item.grupo, 55, y);
+        doc.text(item.prazo, 100, y);
+        doc.text(`R$ ${item.credito.toLocaleString('pt-BR')},00`, 125, y);
         doc.setFont("Helvetica", "bold");
-        doc.text(`${formatarMoeda(item.valParcela)}`, 150, y);
+        doc.text(`${formatarMoeda(item.valParcela)}`, 155, y);
         doc.setFont("Helvetica", "normal");
         
         doc.setDrawColor(241, 245, 249);
@@ -1933,7 +1965,7 @@ function exportarPDFPropostaViva() {
     const jurosInputText = document.getElementById("jurosFinanc").value;
     const taxaAdmInserida = parseFloat(document.getElementById("taxaAdm").value) || 15;
     
-    const modoConteudo = document.getElementById("tipoConteudoPdf").value; // 'ambos', 'financ', 'poderCompra'
+    const modoConteudo = document.getElementById("tipoConteudoPdf").value; 
     const pdfAnoDe = parseInt(document.getElementById("pdfAnoDe").value) || 2014;
     const pdfAnoAte = parseInt(document.getElementById("pdfAnoAte").value) || 2016;
 
