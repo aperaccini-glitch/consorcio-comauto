@@ -357,7 +357,7 @@
             <div class="form-group">
                 <label for="tipoConteudoPdf">Conteúdo a Incluir no PDF</label>
                 <select id="tipoConteudoPdf" onchange="alternarCamposPdf()">
-                    <option value="apenasProposta">📄 Apenas a Proposta do Consórcio (Sem Comparativo / Sem Veículos)</option>
+                    <option value="apenasProposta">📄 Apenas a Proposta do Consórcio (2 Páginas: Valores + Redução Lance)</option>
                     <option value="ambos" selected>📊 Completo (Proposta + Financiamento + Veículos FIPE)</option>
                     <option value="financ">📈 Proposta + Comparativo com Financiamento</option>
                     <option value="poderCompra">🚗 Proposta + Poder de Compra (Veículos FIPE)</option>
@@ -2106,6 +2106,7 @@ function exportarPDFPropostaViva() {
         doc.text(`Página ${pagina} de ${totalPaginas}`, 195, 287, {align: "right"});
     };
 
+    // PÁGINA 1: VALORES DO CONSÓRCIO
     aplicarCabecalho("PROPOSTA DE CONSÓRCIO", "Planejamento Inteligente de Ativos");
     
     doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
@@ -2124,7 +2125,6 @@ function exportarPDFPropostaViva() {
     doc.text(`Valor de Crédito Contratado (Bruto): R$ ${credito.toLocaleString('pt-BR')},00`, 22, 87);
     doc.text(`Parcela Contratada Base: R$ ${parcelaC.toFixed(2)}/mês`, 22, 96);
     
-    // CAIXA DE EMBUTIDO E CRÉDITO LÍQUIDO NA MÃO
     doc.setFillColor(236, 253, 245); doc.rect(15, 113, 180, 26, 'F');
     doc.setDrawColor(187, 247, 208); doc.rect(15, 113, 180, 26, 'S');
     doc.setFont("Helvetica", "bold"); doc.setTextColor(16, 185, 129); doc.setFontSize(9.5);
@@ -2151,6 +2151,7 @@ function exportarPDFPropostaViva() {
         doc.setDrawColor(241, 245, 249); doc.line(15, y+3, 195, y+3); y += 10;
     });
 
+    // PÁGINA DE FINANCIAMENTO (SE SOLICITADO)
     if (modoConteudo === 'ambos' || modoConteudo === 'financ') {
         doc.addPage();
         aplicarCabecalho("ANÁLISE DE CUSTO-BENEFÍCIO", "Consórcio Comauto vs Financiamento");
@@ -2180,6 +2181,7 @@ function exportarPDFPropostaViva() {
         doc.text(`ECONOMIA LÍQUIDA GERADA PARA O CLIENTE: ${formatarMoeda(economiaTotal)}`, 22, 173);
     }
 
+    // PÁGINA DE VEÍCULOS (SE SOLICITADO)
     if (modoConteudo === 'ambos' || modoConteudo === 'poderCompra') {
         doc.addPage();
         aplicarCabecalho("ESTUDO DE PODER DE COMPRA", `Modelos Sugeridos no Mercado FIPE`);
@@ -2225,17 +2227,11 @@ function exportarPDFPropostaViva() {
         }
     }
 
-    if (modoConteudo !== 'apenasProposta') {
-        doc.addPage();
-        aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
-    } else {
-        y += 12;
-        doc.setFont("Helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(11, 35, 65);
-        doc.text("ESTRATÉGIA DE CONTEMPLAÇÃO (REDUÇÃO DE PARCELA)", 15, y);
-        y += 10;
-    }
-    
-    let yBase = modoConteudo === 'apenasProposta' ? y : 58;
+    // PÁGINA 2 (SEMPRE A PÁGINA DO LANCE / REDUÇÃO):
+    doc.addPage();
+    aplicarCabecalho("ESTRATÉGIA DE CONTEMPLAÇÃO", `Simulação de Recálculo de Parcela por Lance`);
+
+    let yBase = 58;
 
     doc.setFont("Helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(11, 35, 65);
     doc.text(`EVOLUÇÃO FINANCEIRA APÓS CONTEMPLAÇÃO (MÊS ${mesContemplacao})`, 15, yBase);
