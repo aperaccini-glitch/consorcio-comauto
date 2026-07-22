@@ -283,6 +283,7 @@
                 <div class="form-group">
                     <label for="grupo">Grupo / Prazo</label>
                     <select id="grupo" onchange="atualizarCampos()">
+                        <option value="50">Grupo 50 (138 Meses) - Imóveis</option>
                         <option value="51">Grupo 51 (162 Meses) - Imóveis</option>
                         <option value="1641">Grupo 1641 (44 Meses) - Auto</option>
                         <option value="1642">Grupo 1642 (50 Meses) - Auto</option>
@@ -312,7 +313,7 @@
                     <label for="tipoParcela">Modalidade da Parcela</label>
                     <select id="tipoParcela" onchange="atualizarTaxaAdm()">
                         <option value="linear">Linear (100%)</option>
-                        <option value="reduzida">Reduzida (75%) - Apenas Grupo 51</option>
+                        <option value="reduzida">Reduzida (75%) - Apenas Imóveis</option>
                         <option value="leve">Leve (50%)</option>
                     </select>
                 </div>
@@ -445,7 +446,7 @@
                 </div>
                 <div class="form-group">
                     <label for="buscaMax">Parcela Máxima (R$)</label>
-                    <input type="number" id="buscaMax" value="1000" oninput="filtrarParcelas()">
+                    <input type="number" id="buscaMax" value="1200" oninput="filtrarParcelas()">
                 </div>
                 <div class="form-group">
                     <label for="buscaModalidade">Modalidade da Parcela</label>
@@ -497,6 +498,7 @@
                 <div class="form-group">
                     <label for="pGrupo">Selecione o Grupo</label>
                     <select id="pGrupo" onchange="pAtualizarCampos()">
+                        <option value="50">Grupo 50 (138 Meses) - Imóveis</option>
                         <option value="51">Grupo 51 (162 Meses) - Imóveis</option>
                         <option value="1641">Grupo 1641 (44 Meses) - Auto</option>
                         <option value="1642">Grupo 1642 (50 Meses) - Auto</option>
@@ -891,6 +893,20 @@
 <script>
 // BANCO DE DADOS ATUALIZADO CONFORME TABELAS OFICIAIS DE 20/07/2026
 const bancoDadosComauto = {
+    "50": {
+        prazo: 138,
+        tipoBem: "imovel",
+        PF: {
+            "91399": { linear: 814.64 },
+            "102823": { linear: 916.47 },
+            "114248": { linear: 1018.30 }
+        },
+        PJ: {
+            "91399": { linear: 814.64 },
+            "102823": { linear: 916.47 },
+            "114248": { linear: 1018.30 }
+        }
+    },
     "51": {
         prazo: 162,
         tipoBem: "imovel",
@@ -1100,7 +1116,7 @@ function atualizarTaxaAdm() {
     const tipoParcela = document.getElementById("tipoParcela").value;
     let taxa = 15;
 
-    if (grupo === "51") {
+    if (grupo === "50" || grupo === "51") {
         taxa = 22; 
     } else if (tipoParcela === "leve" || tipoParcela === "reduzida") {
         taxa = 19; 
@@ -1132,7 +1148,7 @@ function atualizarCampos() {
     }
     
     selectPrazoFinanc.innerHTML = "";
-    if (grupo === "51") {
+    if (grupo === "50" || grupo === "51") {
         labelPrazo.textContent = "Prazo do Financiamento Imobiliário";
         labelJuros.textContent = "Taxa Juros Banco (% a.a. + TR)";
         inputJuros.value = "11.70"; 
@@ -1181,7 +1197,7 @@ function calcularTudo() {
     const plano = bancoDadosComauto[grupo];
     const prazo = plano.prazo;
     
-    if (grupo !== "51" && tipoParcela === "reduzida") {
+    if (grupo !== "50" && grupo !== "51" && tipoParcela === "reduzida") {
         tipoParcela = "linear";
         document.getElementById("tipoParcela").value = "linear";
     }
@@ -1213,7 +1229,7 @@ function calcularTudo() {
     let taxaJurosInput = parseFloat(document.getElementById("jurosFinanc").value) || 0;
     let taxaJurosMensal = 0;
     
-    if (grupo === "51") {
+    if (grupo === "50" || grupo === "51") {
         taxaJurosMensal = Math.pow(1 + (taxaJurosInput / 100), 1 / 12) - 1;
     } else {
         taxaJurosMensal = taxaJurosInput / 100;
@@ -1888,7 +1904,6 @@ function exportarPDFEstudoPersonalizado() {
     doc.rect(15, y, 180, 10, 'F');
     doc.setFont("Helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(11, 35, 65);
     
-    // CABEÇALHO CORRIGIDO COM POSIÇÕES X ESPAÇADAS
     doc.text("TIPO BEM", 18, y + 6.5);
     doc.text("GRUPO / PERFIL", 58, y + 6.5);
     doc.text("PRAZO", 115, y + 6.5);
@@ -1904,7 +1919,6 @@ function exportarPDFEstudoPersonalizado() {
             y = 20;
         }
         
-        // VALORES IMPRESSOS SEM EMOJIS PARA NÃO QUEBRAR A FONTE
         doc.text(item.tipoBem, 18, y);
         doc.text(item.grupo, 58, y);
         doc.text(item.prazo, 115, y);
@@ -1973,7 +1987,7 @@ function exportarPDFPropostaViva() {
     const pctLance = (valorLance / credito) * 100;
     
     let taxaJurosMensal = 0;
-    if (grupo === "51") {
+    if (grupo === "50" || grupo === "51") {
         taxaJurosMensal = Math.pow(1 + (parseFloat(jurosInputText) / 100), 1 / 12) - 1;
     } else {
         taxaJurosMensal = parseFloat(jurosInputText) / 100;
@@ -2065,7 +2079,7 @@ function exportarPDFPropostaViva() {
     const itens = [
         ["Prazo Operacional do Grupo", `${prazo} meses`],
         ["Taxa de Administração Total Contratada", `R$ ${txAdmReais.toLocaleString('pt-BR')},00 (${taxaAdmInserida.toFixed(1)}%)`],
-        ["Fundo de Seguro de Vida", `${perfil === "PF" && grupo !== "1643" && grupo !== "1646" && grupo !== "51" ? "Incluso em Tabela" : "Isento / Não aplicável"}`],
+        ["Fundo de Seguro de Vida", `${perfil === "PF" && grupo !== "1643" && grupo !== "1646" && grupo !== "50" && grupo !== "51" ? "Incluso em Tabela" : "Isento / Não aplicável"}`],
         ["Reajuste de Tabela Homologado", "Anual, indexado pelo IPCA"],
         ["Custo Total Fixo de Tabela", `${formatarMoeda(totalConsorcioAteFim)}`],
         ["Modalidade Selecionada", `Parcela ${tipoParcela.toUpperCase()}`]
@@ -2093,7 +2107,7 @@ function exportarPDFPropostaViva() {
         doc.setFillColor(248, 250, 252); doc.rect(15, 114, 180, 32, 'F');
         doc.setDrawColor(226, 232, 240); doc.rect(15, 114, 180, 32, 'S');
         doc.setFont("Helvetica", "bold"); doc.setTextColor(11, 35, 65);
-        const tipoFinancTexto = grupo === "51" ? `IMOBILIÁRIO SFH (${jurosInputText}% a.a. + TR)` : `AUTO PRICE (${jurosInputText}% a.m.)`;
+        const tipoFinancTexto = (grupo === "50" || grupo === "51") ? `IMOBILIÁRIO SFH (${jurosInputText}% a.a. + TR)` : `AUTO PRICE (${jurosInputText}% a.m.)`;
         doc.text(`FINANCIAMENTO ${tipoFinancTexto} - ${prazoFinanc} MESES:`, 22, 125);
         doc.setFont("Helvetica", "normal"); doc.setTextColor(71, 85, 105);
         doc.text(`Parcela Mensal Inicial: ${formatarMoeda(parcelaF)}/mês`, 22, 133);
